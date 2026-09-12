@@ -1,0 +1,163 @@
+# ==============================================================================
+# Access Portal — Caddyfile
+# ==============================================================================
+# Caddy is used as a reverse proxy in front of the Next.js application.
+# It automatically provisions TLS certificates (via Let's Encrypt) when a
+# real domain is used, and falls back to a self-signed cert for bare IPs.
+#
+# HOW TO SWITCH BETWEEN DOMAIN AND IP:
+# ─────────────────────────────────────
+# Option A — Public Domain (recommended for production):
+#   • Set the site address to your domain, e.g.  access.example.com
+#   • Caddy auto-fetches a Let's Encrypt TLS certificate (port 80/443 must be
+#     reachable from the internet).
+#   • Make sure your DNS A/AAAA record points to this server's public IP.
+#   • Example:  access.example.com { ... }
+#
+# Option B — IP Address (LAN / VPN / quick testing):
+#   • Replace the site address with the IP (and optionally port), e.g.
+#       http://192.168.1.100       — plain HTTP, no TLS
+#       https://192.168.1.100      — TLS with auto self-signed cert (browser warning)
+#   • Caddy cannot get a Let's Encrypt cert for a bare IP, so it generates a
+#     local CA cert instead.  Import Caddy's root CA into your browser/OS if
+#     you want the green padlock.
+#       docker exec caddy caddy trust     # adds Caddy CA to the host trust store
+#
+# Option C — localhost (development):
+#   • Use  http://localhost  or  localhost  (Caddy handles both).
+#
+# ──────────────────────────────────────────────────────────────────────────────
+# QUICK-EDIT GUIDE
+# ──────────────────────────────────────────────────────────────────────────────
+#   1. Change SITE ADDRESS  →  the first line of each block (before the `{`).
+#   2. Change UPSTREAM PORT →  the `reverse_proxy` directive inside the block.
+#                              The service name `nextjs:3000` works inside Docker.
+#                              Use `localhost:3000` outside Docker.
+#   3. Enable/disable HTTPS →  prefix with `https://` (auto TLS) or `http://`
+#                              (no TLS, useful behind another TLS terminator).
+# ==============================================================================
+
+
+# ------------------------------------------------------------------------------
+# GLOBAL OPTIONS  (applies to all sites)
+# ------------------------------------------------------------------------------
+{
+    # --- Admin API email (required by Let's Encrypt for notifications) ----------
+    # Change this to your real email when using a domain in production.
+    email admin@example.com
+
+    # --- TLS / ACME settings ---------------------------------------------------
+    # Uncomment the line below to use the Let's Encrypt STAGING environment
+    # while testing.  Staging certs are NOT trusted by browsers but have higher
+    # rate limits, so you can iterate without hitting production limits.
+    # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+
+    # --- Automatic HTTPS behavior ----------------------------------------------
+    # "off"            → never redirect HTTP → HTTPS (useful for plain-IP setups)
+    # Remove this line → Caddy automatically redirects HTTP to HTTPS for domains.
+    # auto_https off
+
+    # --- Log level (debug | info | warn | error) -------------------------------
+    log {
+        level info
+    }
+}
+
+
+# ==============================================================================
+# SITE BLOCK — edit the address on the next line to match your setup
+# ==============================================================================
+
+# ── Option A: Real domain ─────────────────────────────────────────────────────
+# access.example.com {
+
+# ── Option B: LAN / VPN IP ────────────────────────────────────────────────────
+# Replace with the actual IP of this host (see SSH_HOST in .env.local).
+# http://192.168.1.100 {
+
+# ── Option C: Local development ───────────────────────────────────────────────
+# localhost {
+
+# ── ACTIVE CONFIGURATION (change this line) ───────────────────────────────────
+# Using `:80` means "listen on all interfaces on port 80" — plain HTTP.
+# Swap for your domain or IP as needed.
+:80 {
+
+    # --------------------------------------------------------------------------
+    # Logging — one log line per request
+    # --------------------------------------------------------------------------
+    log {
+        output stdout
+        format console
+        level  info
+    }
+
+    # --------------------------------------------------------------------------
+    # Security headers — good defaults for a web app
+    # --------------------------------------------------------------------------
+    header {
+        # Prevent clickjacking
+        X-Frame-Options "SAMEORIGIN"
+        # Prevent MIME-type sniffing
+        X-Content-Type-Options "nosniff"
+        # Basic XSS protection
+        X-XSS-Protection "1; mode=block"
+        # Remove the Caddy "Server" header to avoid leaking software version
+        -Server
+    }
+
+    # --------------------------------------------------------------------------
+    # Compression — reduces bandwidth for text assets
+    # --------------------------------------------------------------------------
+    encode gzip zstd
+
+    # --------------------------------------------------------------------------
+    # Reverse proxy to the Next.js application
+    # --------------------------------------------------------------------------
+    # Inside Docker Compose, services talk to each other by service name.
+    # The service is named `nextjs` and listens on port 3000.
+    #
+    # ┌── CHANGE THIS IF:
+    # │   • You renamed the Next.js service in docker-compose.yml → update "nextjs"
+    # │   • You changed the internal port → update "3000"
+    # │   • Running Caddy outside Docker (e.g. on the host) → use "localhost:3000"
+    # └──
+    reverse_proxy nextjs:3000 {
+        # Forward real client IP so Next.js sees it in request headers
+        header_up X-Real-IP        {remote_host}
+        header_up X-Forwarded-For  {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+
+        # Health-check: Caddy will mark the upstream healthy/unhealthy.
+        # Adjust the path to a real health-check endpoint if you add one.
+        # health_uri  /api/health
+        # health_interval 10s
+    }
+}
+
+
+# ==============================================================================
+# HTTPS EXAMPLE — uncomment and edit to use with a real domain + TLS
+# ==============================================================================
+# access.example.com {
+#
+#     log {
+#         output stdout
+#         format console
+#     }
+#
+#     header {
+#         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+#         X-Frame-Options "SAMEORIGIN"
+#         X-Content-Type-Options "nosniff"
+#         -Server
+#     }
+#
+#     encode gzip zstd
+#
+#     reverse_proxy nextjs:3000 {
+#         header_up X-Real-IP        {remote_host}
+#         header_up X-Forwarded-For  {remote_host}
+#         header_up X-Forwarded-Proto {scheme}
+#     }
+# }

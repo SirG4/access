@@ -1,0 +1,41 @@
+# ==============================================================================
+# .dockerignore — keeps the Docker build context lean & fast
+# ==============================================================================
+
+# ── Node / package manager ────────────────────────────────────────────────────
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.yarn
+
+# ── Next.js build output ──────────────────────────────────────────────────────
+# These are regenerated inside the container by `npm run build`.
+.next
+out
+build
+
+# ── Git / IDE ─────────────────────────────────────────────────────────────────
+.git
+.gitignore
+.DS_Store
+*.pem
+
+# ── Environment files ─────────────────────────────────────────────────────────
+# NEVER bake secrets into the image; pass them via env_file in docker-compose.
+.env
+.env.*
+
+# ── Docker files (don't need to COPY these into the image) ───────────────────
+Dockerfile
+docker-compose.yml
+Caddyfile
+.dockerignore
+
+# ── Testing & coverage ────────────────────────────────────────────────────────
+coverage
+
+# ── Editor / OS artifacts ─────────────────────────────────────────────────────
+*.tsbuildinfo
+next-env.d.ts

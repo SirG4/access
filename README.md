@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Access Portal — Next.js + MongoDB + Docker + Caddy
 
-## Getting Started
+A web portal for scheduling, provisioning, and managing Ubuntu + OpenSSH Docker containers with persistent user storage.
 
-First, run the development server:
+---
+
+## 🚀 Quick Setup with Docker
+
+To bring up the entire stack (Next.js App, MongoDB database, Caddy Reverse Proxy, and user SSH container base image):
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Make setup script executable and run it
+chmod +x setup.sh
+./setup.sh
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Or step-by-step:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```bash
+# 1. Build the user SSH container base image
+docker build -t access-ubuntu-ssh:latest ./docker
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# 2. Start all services using Docker Compose
+docker compose up -d --build
+```
 
-## Learn More
+Access the portal at `http://localhost` (or your configured IP/domain).
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🌐 Configuring Caddy (Domain vs IP vs Localhost)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The project includes a fully commented [`Caddyfile`](file:///home/bigga/access/Caddyfile) for reverse proxying traffic to the Next.js application.
 
-## Deploy on Vercel
+### Option A: Custom Domain (Automatic HTTPS via Let's Encrypt)
+1. Open [`Caddyfile`](file:///home/bigga/access/Caddyfile).
+2. Replace `:80` with your domain (e.g. `access.example.com`).
+3. Ensure ports 80 and 443 on your server are accessible from the internet.
+4. Restart Caddy: `docker compose restart caddy`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Option B: Bare IP Address (LAN / VPN / Public IP)
+1. Open [`Caddyfile`](file:///home/bigga/access/Caddyfile).
+2. Set the block header to `http://YOUR_SERVER_IP` (for plain HTTP) or `https://YOUR_SERVER_IP` (for internal TLS with auto self-signed certificates).
+3. Update `SSH_HOST` in `.env.local` to match your server IP so users get the correct SSH command.
+4. Restart Caddy: `docker compose restart caddy`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Option C: Local Development (`localhost`)
+1. By default, Caddy listens on `:80` proxying directly to `nextjs:3000`.
+
+---
+
+## 🛠 Project Services Architecture
+
+- **Next.js Web App** (`access_nextjs`): Port 3000 internally, reverse-proxied by Caddy. Mounted to `/var/run/docker.sock` to dynamically spawn and terminate user SSH containers.
+- **MongoDB** (`access_mongodb`): Stores users, slot requests, container metadata, and audit logs.
+- **Caddy Proxy** (`access_caddy`): Handles HTTP/HTTPS routing, headers, gzip/zstd compression, and automated TLS certificates.
+- **SSH Base Image** (`access-ubuntu-ssh:latest`): Ubuntu + OpenSSH template image used by `lib/docker.js` to provision containers per user session.
+
+---
+
+## 📜 Useful Commands
+
+```bash
+# View live logs for all services
+docker compose logs -f
+
+# View logs for a specific service (e.g., nextjs or caddy)
+docker compose logs -f nextjs
+
+# Restart services after editing Caddyfile or .env.local
+docker compose restart
+
+# Stop all containers (retains MongoDB data & volumes)
+docker compose down
+
+# Stop and wipe database data (CAUTION)
+docker compose down -v
+```

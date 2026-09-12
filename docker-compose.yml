@@ -1,0 +1,179 @@
+# ==============================================================================
+# Access Portal — Docker Compose
+# ==============================================================================
+# Services:
+#   nextjs    — Next.js web application (production build)
+#   mongodb   — MongoDB database
+#   caddy     — Reverse proxy / TLS termination
+#
+# Usage:
+#   Start everything:   docker compose up -d
+#   Rebuild app only:   docker compose up -d --build nextjs
+#   View logs:          docker compose logs -f
+#   Tear down:          docker compose down          (keeps volumes)
+#                       docker compose down -v       (also removes volumes ← data loss!)
+#
+# Environment variables are loaded from .env.local (see the env_file entries).
+# Copy .env.local to .env.production and edit before deploying to production.
+# ==============================================================================
+
+services:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Next.js Application
+  # ────────────────────────────────────────────────────────────────────────────
+  nextjs:
+    build:
+      context: .           # project root (where the root Dockerfile lives)
+      dockerfile: Dockerfile
+    container_name: access_nextjs
+    restart: unless-stopped
+
+    env_file:
+      - .env.local         # ← swap to .env.production for prod
+
+    environment:
+      # Override MONGODB_URI to point at the `mongodb` service instead of localhost.
+      # This works because Docker Compose puts all services on the same network.
+      MONGODB_URI: mongodb://mongodb:27017/nextauth_admin_db
+
+      # NEXTAUTH_URL must be the publicly reachable URL of the app.
+      # ┌── CHANGE THIS to your domain or IP:
+      # │   Domain example:   https://access.example.com
+      # │   IP example:       http://192.168.1.100
+      # │   Local dev:        http://localhost
+      # └──
+      NEXTAUTH_URL: http://localhost
+
+      NODE_ENV: production
+
+    # Expose the Next.js port to the host for debugging only.
+    # In production, leave this commented out — Caddy is the only entrypoint.
+    # ports:
+    #   - "3000:3000"
+
+    volumes:
+      # Mount the Docker socket so the app can manage user containers.
+      # ⚠ This grants full Docker daemon access — keep the portal behind auth.
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+    networks:
+      - access_net
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # MongoDB
+  # ────────────────────────────────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7
+    container_name: access_mongodb
+    restart: unless-stopped
+
+    # ── Security: set a root username/password in production ──────────────────
+    # Uncomment and set credentials; also update MONGODB_URI in the nextjs
+    # service to:  mongodb://admin:secret@mongodb:27017/nextauth_admin_db?authSource=admin
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: admin
+    #   MONGO_INITDB_ROOT_PASSWORD: secret
+
+    # Do NOT expose port 27017 to the host in production.
+    # Only expose for local debugging / MongoDB Compass.
+    ports:
+      - "27017:27017"     # ← comment this out in production
+
+    volumes:
+      - mongodb_data:/data/db
+
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+    networks:
+      - access_net
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Caddy — Reverse Proxy
+  # ────────────────────────────────────────────────────────────────────────────
+  caddy:
+    image: caddy:2-alpine
+    container_name: access_caddy
+    restart: unless-stopped
+
+    ports:
+      # HTTP — always exposed so Caddy can redirect to HTTPS and serve ACME challenges.
+      - "80:80"
+      # HTTPS — expose when using a domain with automatic TLS.
+      # Comment this out when running on a bare IP (Caddy uses self-signed cert).
+      - "443:443"
+
+    volumes:
+      # The Caddyfile is the main configuration file.
+      # Edit Caddyfile in the project root; see its comments for domain/IP setup.
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+
+      # Caddy stores TLS certificates and its auto-generated CA here.
+      # This volume must persist so certs survive container restarts.
+      - caddy_data:/data
+
+      # Caddy stores its internal state (e.g. ACME account) here.
+      - caddy_config:/config
+
+    depends_on:
+      - nextjs
+
+    networks:
+      - access_net
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # SSH Container Base Image Builder (optional utility)
+  # ────────────────────────────────────────────────────────────────────────────
+  # This service is used ONCE to pre-build the Ubuntu+OpenSSH image that the
+  # Next.js app provisions for users.  Run with:
+  #   docker compose run --rm ssh-base
+  # Afterwards the image `access-ssh-base:latest` will be available on the host.
+  #
+  # Normally you can just build it manually:
+  #   docker build -t access-ssh-base:latest ./docker
+  #
+  # Uncomment if you want Compose to manage the build automatically.
+  # ssh-base:
+  #   build:
+  #     context: ./docker
+  #     dockerfile: Dockerfile
+  #   image: access-ssh-base:latest
+  #   # This service has no runtime purpose — it only builds the image.
+  #   command: ["echo", "SSH base image built successfully."]
+  #   profiles:
+  #     - build-only   # only starts when explicitly requested
+
+# ==============================================================================
+# Named Volumes
+# ==============================================================================
+volumes:
+  mongodb_data:
+    # Persists all MongoDB data across container restarts.
+    name: access_mongodb_data
+
+  caddy_data:
+    # Persists Caddy TLS certificates and ACME account info.
+    name: access_caddy_data
+
+  caddy_config:
+    # Persists Caddy runtime configuration.
+    name: access_caddy_config
+
+# ==============================================================================
+# Networks
+# ==============================================================================
+networks:
+  access_net:
+    # All services share this bridge network so they can reach each other
+    # by service name (e.g. nextjs:3000, mongodb:27017).
+    name: access_network
+    driver: bridge

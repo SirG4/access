@@ -210,13 +210,14 @@ docker compose up -d --build
 Once the container stack is running, create the default administrator user in MongoDB:
 
 ```bash
-# Execute the seed script inside the Next.js container or from the host
-docker compose exec nextjs node scripts/seed.js
+# Execute the seed script interactively inside the Next.js container:
+docker compose exec -it nextjs node scripts/seed.js
 ```
 
-Or run directly from host if Node.js is installed locally:
+Or run directly on the host machine (if Node.js is installed locally):
 ```bash
-npm run seed
+# Outside Docker on the host machine:
+MONGODB_URI="mongodb://admin:AdminAccesspass@localhost:27017/nextauth_admin_db?authSource=admin" node scripts/seed.js
 ```
 
 ---

@@ -48,6 +48,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Copy the public directory (images, icons, etc.)
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+# Copy scripts directory (utility & seed scripts)
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 
 USER nextjs
 

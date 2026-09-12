@@ -32,29 +32,25 @@ services:
     env_file:
       - .env.local         # ← swap to .env.production for prod
 
-    environment:
-      # Override MONGODB_URI to point at the `mongodb` service instead of localhost.
-      # This works because Docker Compose puts all services on the same network.
-      MONGODB_URI: mongodb://mongodb:27017/nextauth_admin_db
+    # Required so Next.js container process can access mounted /var/run/docker.sock
+    user: root
 
-      # NEXTAUTH_URL must be the publicly reachable URL of the app.
-      # ┌── CHANGE THIS to your domain or IP:
-      # │   Domain example:   https://access.example.com
-      # │   IP example:       http://192.168.1.100
-      # │   Local dev:        http://localhost
-      # └──
-      NEXTAUTH_URL: http://localhost
+    environment:
+      # Interpolates MONGODB_URI from .env.local; defaults to internal service hostname
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017/nextauth_admin_db}
+
+      # NEXTAUTH_URL interpolated from .env.local (e.g. https://access.example.com)
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost}
 
       NODE_ENV: production
 
-    # Expose the Next.js port to the host for debugging only.
+    # Expose the Next.js port to host for local debugging only.
     # In production, leave this commented out — Caddy is the only entrypoint.
     # ports:
     #   - "3000:3000"
 
     volumes:
       # Mount the Docker socket so the app can manage user containers.
-      # ⚠ This grants full Docker daemon access — keep the portal behind auth.
       - /var/run/docker.sock:/var/run/docker.sock
 
     depends_on:
@@ -72,17 +68,17 @@ services:
     container_name: access_mongodb
     restart: unless-stopped
 
-    # ── Security: set a root username/password in production ──────────────────
-    # Uncomment and set credentials; also update MONGODB_URI in the nextjs
-    # service to:  mongodb://admin:secret@mongodb:27017/nextauth_admin_db?authSource=admin
-    # environment:
-    #   MONGO_INITDB_ROOT_USERNAME: admin
-    #   MONGO_INITDB_ROOT_PASSWORD: secret
+    # ── Security: Root username & password passed from .env.local ──────────────
+    # Leave MONGO_ROOT_PASSWORD empty in .env.local for local dev without auth,
+    # or set MONGO_ROOT_USER and MONGO_ROOT_PASSWORD for production authentication.
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-}
 
-    # Do NOT expose port 27017 to the host in production.
-    # Only expose for local debugging / MongoDB Compass.
+    # Bound to 127.0.0.1 (localhost only) so Mongo is NOT exposed to external networks.
+    # Comment this out completely in strict production environments.
     ports:
-      - "27017:27017"     # ← comment this out in production
+      - "127.0.0.1:27017:27017"
 
     volumes:
       - mongodb_data:/data/db

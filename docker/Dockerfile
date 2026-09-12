@@ -8,9 +8,10 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     NVIDIA_VISIBLE_DEVICES=all \
-    NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics \
+    PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}"
 
-# 1. Install system utilities, python, dev libraries, and GPU monitoring tools
+# 1. Install system utilities, networking tools, process managers, and GPU tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     openssh-server \
     sudo \
@@ -22,6 +23,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     vim \
     htop \
     nvtop \
+    btop \
+    iputils-ping \
+    iproute2 \
+    net-tools \
+    dnsutils \
+    procps \
+    tmux \
+    screen \
+    unzip \
+    zip \
+    rsync \
+    tree \
+    less \
+    pciutils \
     ca-certificates \
     bash \
     build-essential \
@@ -35,7 +50,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # 2. Upgrade pip and pre-install PyTorch (CUDA 12.4) + Data Science & AI packages
-# Pre-installing these ensures zero setup time for end users on RTX 4090
 RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
     pip3 install --no-cache-dir \
         torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 && \

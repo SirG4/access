@@ -55,6 +55,8 @@ const question = (query) => new Promise((resolve) => rl.question(query, resolve)
 
 async function seedAdmin() {
   try {
+    const maskedUri = MONGODB_URI.replace(/:([^@]+)@/, ':****@');
+    console.log(`Connecting to database at: ${maskedUri}`);
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to database.');
 

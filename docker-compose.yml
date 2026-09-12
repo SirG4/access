@@ -68,12 +68,8 @@ services:
     container_name: access_mongodb
     restart: unless-stopped
 
-    # ── Security: Root username & password passed from .env.local ──────────────
-    # Leave MONGO_ROOT_PASSWORD empty in .env.local for local dev without auth,
-    # or set MONGO_ROOT_USER and MONGO_ROOT_PASSWORD for production authentication.
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-}
+    env_file:
+      - .env.local
 
     # Bound to 127.0.0.1 (localhost only) so Mongo is NOT exposed to external networks.
     # Comment this out completely in strict production environments.

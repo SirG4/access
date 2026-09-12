@@ -93,11 +93,14 @@ NEXTAUTH_SECRET=GENERATED_SECRET_STRING_GOES_HERE
 NEXTAUTH_URL=https://access.example.com
 
 # ── MongoDB Production Authentication ───────────────────────────────────────
+MONGO_INITDB_ROOT_USERNAME=admin
+MONGO_INITDB_ROOT_PASSWORD=MySuperSecretDBPassword123!
 MONGO_ROOT_USER=admin
 MONGO_ROOT_PASSWORD=MySuperSecretDBPassword123!
 
 # Connection string used by Next.js inside Docker
 MONGODB_URI=mongodb://admin:MySuperSecretDBPassword123!@mongodb:27017/nextauth_admin_db?authSource=admin
+
 
 # ── Host SSH Settings ───────────────────────────────────────────────────────
 # The publicly reachable IP or domain where user SSH containers can be accessed

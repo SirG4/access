@@ -47,7 +47,35 @@ This document outlines the step-by-step procedure to configure, secure, and depl
 2. **Configure DNS Records**:
    Point your domain's **A / AAAA** records (e.g. `access.example.com`) to your server's public IP address.
 
-3. **Configure Server Firewall (UFW / Cloud Security Groups)**:
+3. **Install NVIDIA RTX 4090 GPU Driver & NVIDIA Container Toolkit (Host Machine Setup)**:
+   To allow provisioned containers to access the RTX 4090 GPU, install the official NVIDIA host drivers and NVIDIA Container Toolkit:
+
+   a. **Install NVIDIA Host Driver (Ubuntu 22.04 / 24.04)**:
+   ```bash
+   sudo apt update
+   sudo apt install -y ubuntu-drivers-common
+   sudo ubuntu-drivers install nvidia:535   # or nvidia:550 / nvidia:560
+   sudo reboot
+   ```
+   *Verify host driver after reboot*: `nvidia-smi` (should show GeForce RTX 4090, 24 GB VRAM).
+
+   b. **Install NVIDIA Container Toolkit**:
+   ```bash
+   curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+   curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+     sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+     sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+   sudo apt-get update
+   sudo apt-get install -y nvidia-container-toolkit
+   sudo nvidia-ctk runtime configure --runtime=docker
+   sudo systemctl restart docker
+   ```
+   *Verify Docker GPU access*:
+   ```bash
+   docker run --rm --gpus all nvidia/cuda:12.4.1-base-ubuntu22.04 nvidia-smi
+   ```
+
+4. **Configure Server Firewall (UFW / Cloud Security Groups)**:
    Allow incoming traffic on required ports:
    * **Port 80 / 443**: Web portal traffic (Caddy HTTP/HTTPS)
    * **Port 22**: Host SSH access

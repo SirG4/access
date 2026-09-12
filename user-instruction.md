@@ -2,12 +2,35 @@
 
 Follow these steps to set up the project on any machine after cloning the repository.
 
-## Prerequisites
+## Prerequisites & Hardware
 
 Make sure you have the following installed on your machine:
 - [Node.js](https://nodejs.org/) (v18 or higher recommended)
-- [Docker](https://www.docker.com/products/docker-desktop) and Docker Compose (to run the local MongoDB instance)
+- [Docker](https://www.docker.com/products/docker-desktop) and Docker Compose
+- **NVIDIA Host Driver** (v535+) & **NVIDIA Container Toolkit** (for host PC with NVIDIA RTX 4090 GPU)
 - npm (comes with Node.js)
+
+## GPU & Zero-Setup Features (NVIDIA RTX 4090)
+
+The slot container image is pre-configured for **NVIDIA GeForce RTX 4090** (24 GB VRAM) with **zero setup required by end users**.
+
+### Pre-Installed Packages & AI Suite:
+- **CUDA & GPU Runtime**: CUDA 12.4.1 runtime, `nvidia-smi`, `nvtop` (interactive GPU monitor), `htop`
+- **PyTorch Stack**: `torch` 2.x, `torchvision`, `torchaudio` compiled with CUDA 12.4 support
+- **Data Science Suite**: `numpy`, `scipy`, `pandas`, `matplotlib`, `seaborn`, `scikit-learn`
+- **LLM & Transformers**: HuggingFace `transformers`, `datasets`, `accelerate`, `huggingface_hub`, `bitsandbytes` (4-bit/8-bit quantization), `safetensors`, `einops`, `sentencepiece`, `tiktoken`
+- **Interactive Workspaces**: `jupyterlab`, `notebook`, `ipython`, OpenSSH daemon, `git`, `git-lfs`
+
+### Immediate User GPU Verification Script:
+When users SSH into their provisioned slot container, they can immediately run:
+```bash
+# Verify GPU Detection & PyTorch CUDA Access
+python3 -c "import torch; print('CUDA Available:', torch.cuda.is_available()); print('Device Name:', torch.cuda.get_device_name(0))"
+
+# Check GPU Utilization & VRAM (RTX 4090 24GB)
+nvidia-smi
+nvtop
+```
 
 ## Setup Steps
 
@@ -35,6 +58,7 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret_here
 DOCKER_SOCKET=/var/run/docker.sock
 DOCKER_BASE_IMAGE=access-ubuntu-ssh:latest
 SSH_HOST=localhost
+ENABLE_GPU=true
 ```
 
 ### 3. Start the Local MongoDB Database
@@ -44,13 +68,14 @@ docker compose up -d
 ```
 *(To stop the database later, you can run `docker compose down`)*
 
-### 4. Build or Tag the Base Docker Image
-The supercomputer slot provisioning engine uses an Ubuntu base container with OpenSSH server (`access-ubuntu-ssh:latest`).
+### 4. Build the RTX 4090 Base Docker Image
+The supercomputer slot provisioning engine uses the GPU-accelerated Ubuntu base container with OpenSSH server, CUDA 12.4, and PyTorch (`access-ubuntu-ssh:latest`).
 Build the image from the included `docker/` directory:
 ```bash
+./setup.sh
+# or manually:
 docker build -t access-ubuntu-ssh:latest docker/
 ```
-*(Or if `lab/ubuntu-ssh:latest` is already present on your host: `docker tag lab/ubuntu-ssh:latest access-ubuntu-ssh:latest`)*.
 
 ### 5. Seed the Database (Optional but Recommended)
 To create an initial admin user so you can log into the admin dashboard, run the seeding script:

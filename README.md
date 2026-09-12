@@ -1,12 +1,18 @@
-# Access Portal — Next.js + MongoDB + Docker + Caddy
+A web portal for scheduling, provisioning, and managing GPU-accelerated (NVIDIA RTX 4090) Ubuntu + OpenSSH Docker containers with pre-installed PyTorch 2.x, CUDA 12.4, HuggingFace transformers, and persistent user storage.
 
-A web portal for scheduling, provisioning, and managing Ubuntu + OpenSSH Docker containers with persistent user storage.
+---
+
+## ⚡ Key Features (NVIDIA RTX 4090 GPU Ready)
+
+- **Zero-Setup AI Suite**: Containers come pre-loaded with **CUDA 12.4**, **PyTorch 2.x**, **HuggingFace Transformers**, `bitsandbytes`, `jupyterlab`, `nvtop`, `htop`, and data science tools. Users require zero manual package setup!
+- **NVIDIA GPU Passthrough**: Automatic `--gpus all` device binding for 24 GB VRAM performance on NVIDIA RTX 4090.
+- **Dynamic Port & SSH Provisioning**: Isolated SSH user accounts with randomized passwords, live countdown timers, and persistent storage volumes `/home/<user>`.
 
 ---
 
 ## 🚀 Quick Setup with Docker
 
-To bring up the entire stack (Next.js App, MongoDB database, Caddy Reverse Proxy, and user SSH container base image):
+To bring up the entire stack (Next.js App, MongoDB database, Caddy Reverse Proxy, and RTX 4090 GPU SSH container base image):
 
 ```bash
 # Make setup script executable and run it

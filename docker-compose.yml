@@ -36,12 +36,6 @@ services:
     user: root
 
     environment:
-      # Interpolates MONGODB_URI from .env.local; defaults to internal service hostname
-      MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017/nextauth_admin_db}
-
-      # NEXTAUTH_URL interpolated from .env.local (e.g. https://access.example.com)
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost}
-
       NODE_ENV: production
 
     # Expose the Next.js port to host for local debugging only.

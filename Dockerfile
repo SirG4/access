@@ -12,7 +12,7 @@ WORKDIR /app
 
 # Copy lockfile + manifests first to leverage Docker layer cache.
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev
+RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev
 
 # ── Stage 2: builder ──────────────────────────────────────────────────────────
 # Full build including devDependencies (needed for Next.js compilation).
@@ -20,14 +20,14 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 # Copy the full source tree
 COPY . .
 
 # Build the Next.js standalone bundle.
 # Environment variables needed at build time can be passed here with --build-arg.
-RUN npm run build
+RUN --mount=type=cache,target=/root/.npm npm run build
 
 # ── Stage 3: runner ───────────────────────────────────────────────────────────
 # Minimal runtime image — only the standalone output + static files.

@@ -3,7 +3,9 @@
 # setup.sh — Setup & Build Helper for Access Portal (NVIDIA RTX 4090 GPU Ready)
 # Run this ONCE before launching `docker compose up -d`
 # ==============================================================================
-set -euo pipefail
+# Enable Docker BuildKit & Compose CLI build for fast parallel image builds
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
 
 echo ""
 echo "╔═══════════════════════════════════════════════════════════════════╗"
@@ -38,8 +40,8 @@ echo ""
 # ── 1. Build the GPU-enabled SSH base image ───────────────────────────────────
 # The Next.js app provisions Ubuntu + CUDA 12.4 + PyTorch containers for users.
 # The image must exist on the Docker host before any container is created.
-echo "▶  Building GPU SSH base image (access-ubuntu-ssh:latest)..."
-echo "   (Pre-installing PyTorch, CUDA 12.4, Transformers, JupyterLab, etc.)"
+echo "▶  Building GPU SSH base image (access-ubuntu-ssh:latest) via uv..."
+echo "   (Pre-installing PyTorch, CUDA 12.4, Transformers, JupyterLab via fast Astral uv installer...)"
 docker build -t access-ubuntu-ssh:latest ./docker
 echo "✔  GPU SSH base image built successfully."
 

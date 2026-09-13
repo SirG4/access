@@ -11,8 +11,13 @@ ENV DEBIAN_FRONTEND=noninteractive \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics \
     PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}"
 
+# Copy Astral uv package installer from official image for ultra-fast dependency resolution & installs
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 # 1. Install system utilities, networking tools, process managers, and GPU tools
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
     openssh-server \
     sudo \
     curl \
@@ -49,11 +54,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Upgrade pip and pre-install PyTorch (CUDA 12.4) + Data Science & AI packages
-RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip3 install --no-cache-dir \
+# 2. Pre-install PyTorch (CUDA 12.4) + Data Science & AI packages via fast Astral uv installer
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system --no-cache \
         torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 && \
-    pip3 install --no-cache-dir \
+    uv pip install --system --no-cache \
         numpy \
         scipy \
         pandas \

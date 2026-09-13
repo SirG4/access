@@ -12,12 +12,12 @@ A web portal for scheduling, provisioning, and managing GPU-accelerated (NVIDIA 
 
 ## 🚀 Quick Setup with Docker
 
-To bring up the entire stack (Next.js App, MongoDB database, Caddy Reverse Proxy, and RTX 4090 GPU SSH container base image):
+To bring up the entire stack (Next.js App, MongoDB database, Caddy Reverse Proxy, and RTX 4090 GPU SSH container base image with fast `uv` installation):
 
 ```bash
-# Make setup script executable and run it
-chmod +x setup.sh
-./setup.sh
+# Make setup scripts executable and run
+chmod +x setup setup.sh
+./setup
 ```
 
 Or step-by-step:

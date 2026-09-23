@@ -10,25 +10,38 @@ A web portal for scheduling, provisioning, and managing GPU-accelerated (NVIDIA 
 
 ---
 
-## 🚀 Quick Setup with Docker
+## 🚀 Quick Setup
 
-To bring up the entire stack (Next.js App, MongoDB database, Caddy Reverse Proxy, and RTX 4090 GPU SSH container base image with fast `uv` installation):
+To bring up the entire stack (Next.js App, MongoDB database, Caddy Reverse Proxy, and RTX 4090 GPU SSH container base image with fast `uv` installation), follow these steps:
 
-```bash
-# Make setup scripts executable and run
-chmod +x setup setup.sh
-./setup
-```
+1. **Install Node dependencies:**
+   ```bash
+   npm install
+   ```
 
-Or step-by-step:
+2. **Configure Environment Variables:**
+   Ensure you have a `.env.local` file in the root directory. You can use the existing `.env.local` or create a new one. Update `NEXTAUTH_SECRET` and MongoDB credentials as needed.
 
-```bash
-# 1. Build the user SSH container base image
-docker build -t access-ubuntu-ssh:latest ./docker
+3. **Make setup scripts executable and run:**
+   - **For Production / Full GPU setup:**
+     ```bash
+     chmod +x setup setup.sh
+     ./setup
+     ```
+     *(This builds the RTX 4090 CUDA SSH base image and starts all services via Docker Compose)*
 
-# 2. Start all services using Docker Compose
-docker compose up -d --build
-```
+   - **For Fast Lightweight Development (CPU PyTorch / Low Download footprint):**
+     ```bash
+     chmod +x setup-development setup-development.sh setup-dev
+     ./setup-development   # or ./setup-dev
+     ```
+     *(This builds the lightweight Ubuntu 22.04 + CPU PyTorch image `access-ubuntu-ssh:dev` and starts dev services)*
+
+4. **Seed the Admin User:**
+   Once MongoDB is running, run the interactive seed script to create your admin account:
+   ```bash
+   node scripts/seed.js
+   ```
 
 Access the portal at `http://localhost` (or your configured IP/domain).
 

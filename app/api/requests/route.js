@@ -22,7 +22,9 @@ export async function GET(req) {
 
     let query = {};
 
-    if (session.user.role === 'admin') {
+    const adminView = searchParams.get('adminView') === 'true';
+
+    if (session.user.role === 'admin' && adminView) {
       // Admin can view all requests or filter by user/status
       const userId = searchParams.get('userId');
       if (userId) {
@@ -38,7 +40,7 @@ export async function GET(req) {
 
       return NextResponse.json(requests);
     } else {
-      // Normal user can only view their own requests
+      // Normal user (or admin viewing their own dashboard) can only view their own requests
       query.userId = session.user.id;
       if (status) {
         query.status = status;

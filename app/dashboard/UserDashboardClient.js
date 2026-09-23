@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import Sidebar from "@/app/components/Sidebar";
 
 /* ─── Helper Functions ─────────────────────────────────────────── */
 
@@ -163,52 +164,7 @@ export default function UserDashboardClient({ session }) {
       <style>{css}</style>
       <div className="dash-layout">
         {/* ── Sidebar Nav ── */}
-        <aside className="sidebar">
-          <div className="brand-header">
-            <span className="brand-logo">⚡ Access</span>
-            <span className="brand-sub">Supercomputer Portal</span>
-          </div>
-
-          <nav className="nav-menu">
-            <Link href="/dashboard" className="nav-link active">
-              <span className="nav-icon">🖥️</span> Active Access
-            </Link>
-            <Link href="/dashboard/calendar" className="nav-link">
-              <span className="nav-icon">📅</span> Calendar & Booking
-            </Link>
-            {session.user.role === "admin" && (
-              <>
-                <div className="nav-group-title">Admin Management</div>
-                <Link href="/admin/requests" className="nav-link">
-                  <span className="nav-icon">📋</span> Review Requests
-                </Link>
-                <Link href="/admin/containers" className="nav-link">
-                  <span className="nav-icon">🐳</span> Containers & Storage
-                </Link>
-                <Link href="/admin/users" className="nav-link">
-                  <span className="nav-icon">👥</span> User Management
-                </Link>
-              </>
-            )}
-          </nav>
-
-          <div className="sidebar-footer">
-            <div className="user-profile">
-              <div className="user-avatar">{session.user.email?.[0]?.toUpperCase() || "U"}</div>
-              <div className="user-info">
-                <div className="user-email" title={session.user.email}>{session.user.email}</div>
-                <div className="user-role-badge">{session.user.role || "User"}</div>
-              </div>
-            </div>
-            <button
-              id="dash-signout-btn"
-              className="btn-signout"
-              onClick={() => signOut({ callbackUrl: "/auth/signin" })}
-            >
-              Sign Out
-            </button>
-          </div>
-        </aside>
+        <Sidebar session={session} />
 
         {/* ── Main Content Area ── */}
         <main className="main-content">

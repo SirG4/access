@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Sidebar from "@/app/components/Sidebar";
 
 function formatDate(iso) {
   if (!iso) return "—";
@@ -321,35 +322,29 @@ export default function AdminContainersPage() {
         />
       )}
 
-      <div className="page">
-        <div className="container">
+      <div className="dash-layout">
+        <Sidebar session={session} />
+        <main className="main-content">
           {/* Header */}
-          <div className="page-header">
+          <header className="content-header">
             <div>
-              <p className="wordmark">Access</p>
-              <h1>Containers & Storage</h1>
-              <p className="sub">
+              <h1 className="header-title">Containers & Storage</h1>
+              <p className="header-subtitle">
                 Manage host Docker containers, allocated SSH ports, and persistent storage volumes
               </p>
             </div>
-            <div className="header-nav">
-              <Link href="/admin/requests" className="nav-link">
-                Requests
-              </Link>
-              <Link href="/admin/containers" className="nav-link nav-link-active">
-                Containers
-              </Link>
-              <Link href="/admin/audit-logs" className="nav-link">
-                Audit Logs
-              </Link>
-              <Link href="/admin/users" className="nav-link">
-                Users
-              </Link>
-              <Link href="/dashboard" className="nav-link">
-                Dashboard
-              </Link>
+            <div className="header-actions">
+              <button
+                className="btn-refresh"
+                onClick={fetchContainers}
+                type="button"
+                id="refresh-btn"
+                disabled={loading}
+              >
+                {loading ? "Refreshing..." : "⟳ Refresh Status"}
+              </button>
             </div>
-          </div>
+          </header>
 
           {/* Stats Row */}
           <div className="stats-grid">
@@ -415,14 +410,6 @@ export default function AdminContainersPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button
-                className="btn-refresh"
-                onClick={fetchContainers}
-                type="button"
-                id="refresh-btn"
-              >
-                ↻ Refresh
-              </button>
             </div>
           </div>
 
@@ -519,7 +506,7 @@ export default function AdminContainersPage() {
               {filtered.length} {filtered.length === 1 ? "container" : "containers"} shown
             </span>
           </div>
-        </div>
+        </main>
       </div>
     </>
   );
@@ -533,81 +520,46 @@ const pageStyles = `
 
   body { background: #fafafa; }
 
-  .page {
-    min-height: 100vh;
-    background: #fafafa;
-    font-family: 'Inter', system-ui, sans-serif;
-    padding: 2rem 1rem;
-  }
-
-  .container {
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .page-header {
+  .dash-layout {
     display: flex;
-    align-items: flex-start;
+    min-height: 100vh;
+    background-color: #fafafa;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .main-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    background-color: #fafafa;
+  }
+
+  .content-header {
+    display: flex;
+    align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.75rem;
+    margin-bottom: 2rem;
     gap: 1rem;
     flex-wrap: wrap;
   }
 
-  .wordmark {
-    font-size: 0.875rem;
+  .header-title {
+    font-size: 1.5rem;
     font-weight: 700;
-    color: #111;
-    letter-spacing: -0.01em;
-    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+    color: #111111;
   }
 
-  h1 {
-    font-size: 1.65rem;
-    font-weight: 700;
-    color: #111;
-    letter-spacing: -0.025em;
-    margin-bottom: 0.25rem;
-  }
-
-  .sub {
+  .header-subtitle {
     font-size: 0.875rem;
-    color: #666;
+    color: #555555;
+    margin-top: 0.25rem;
   }
 
-  .header-nav {
+  .header-actions {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-  }
-
-  .nav-link {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: #555;
-    text-decoration: none;
-    padding: 0.4rem 0.8rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background: #fff;
-    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-  }
-
-  .nav-link:hover {
-    background: #f5f5f5;
-    border-color: #ccc;
-    color: #111;
-  }
-
-  .nav-link-active {
-    background: #111;
-    color: #fff;
-    border-color: #111;
-  }
-
-  .nav-link-active:hover {
-    background: #333;
-    color: #fff;
+    gap: 0.75rem;
   }
 
   /* Stats grid */

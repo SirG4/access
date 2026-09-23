@@ -42,55 +42,54 @@ npm install
 
 ### 2. Configure Environment Variables
 You need a `.env.local` file for the application to run.
-1. Create a file named `.env.local` in the root directory.
-2. Add the following variables (you can replace the secret and DB URI if needed):
+1. Ensure you have a `.env.local` file in the root directory (you can use or copy the existing one).
+2. Ensure the following variables are set appropriately (update `NEXTAUTH_SECRET` and MongoDB credentials for production):
 
 ```env
-NEXTAUTH_SECRET=a_very_secure_random_string_for_testing
+NEXTAUTH_SECRET=a_very_secure_random_string
 NEXTAUTH_URL=http://localhost:3000
-MONGODB_URI=mongodb://localhost:27017/nextauth_admin_db
+
+# Database Connection String
+MONGODB_URI=mongodb://admin:AdminAccesspass@127.0.0.1:27017/nextauth_admin_db?authSource=admin
 
 # (Optional) For Google Authentication
 GOOGLE_CLIENT_ID=your_google_client_id_here
 GOOGLE_CLIENT_SECRET=your_google_client_secret_here
 
 # (Optional) Docker Engine & SSH Configuration
-DOCKER_SOCKET=/var/run/docker.sock
-DOCKER_BASE_IMAGE=access-ubuntu-ssh:latest
-SSH_HOST=localhost
+SSH_HOST=127.0.0.1
 ENABLE_GPU=true
 ```
 
-### 3. Start the Local MongoDB Database
-Ensure Docker is running on your machine, then execute the following command to start the MongoDB container in the background:
-```bash
-docker compose up -d
-```
-*(To stop the database later, you can run `docker compose down`)*
+### 3. Run Setup Script (Build Image & Start Services)
+The supercomputer slot provisioning engine uses a GPU-accelerated Ubuntu base container with OpenSSH server, CUDA 12.4, and PyTorch (`access-ubuntu-ssh:latest`).
 
-### 4. Build the RTX 4090 Base Docker Image
-The supercomputer slot provisioning engine uses the GPU-accelerated Ubuntu base container with OpenSSH server, CUDA 12.4, and PyTorch (`access-ubuntu-ssh:latest`).
-Build the image from the included `docker/` directory:
+Run the automated setup script which will build the Docker image and start all services (Next.js, MongoDB, Caddy) in the background:
+
+**For Production / Full GPU Mode:**
 ```bash
-./setup.sh
-# or manually:
-docker build -t access-ubuntu-ssh:latest docker/
+chmod +x setup setup.sh
+./setup
 ```
 
-### 5. Seed the Database (Optional but Recommended)
-To create an initial admin user so you can log into the admin dashboard, run the seeding script:
+**For Lightweight Fast Development Mode (Low Download Footprint / CPU PyTorch):**
+```bash
+chmod +x setup-development setup-development.sh setup-dev
+./setup-development   # or ./setup-dev
+```
+
+### 4. Seed the Admin User
+To create an initial admin user so you can log into the admin dashboard, run the interactive seeding script (MongoDB must be running from the previous step):
 ```bash
 node scripts/seed.js
 ```
-*(Note: If the script uses modern ES modules or needs to be compiled, ensure you use the correct command. For this project, standard node should work).*
+*(You will be prompted to enter a username and password)*
 
-### 6. Start the Development Server
-Finally, start the Next.js development server:
-```bash
-npm run dev
-```
+### 5. Access the Application
+The application should now be running.
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
+- **Production/Docker mode:** Access via [http://localhost](http://localhost) (proxied through Caddy).
+- **Development mode:** You can run `npm run dev` and access via [http://localhost:3000](http://localhost:3000).
 
 ### 7. Running Validation & Checkpoint Tests
 

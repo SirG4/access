@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Sidebar from "@/app/components/Sidebar";
 
 /* ─── helpers ─────────────────────────────────────────────── */
 
@@ -420,21 +421,24 @@ export default function CalendarPage() {
       )}
 
       {/* ── Page ── */}
-      <div className="cal-page">
+      <div className="dash-layout">
         {/* ── Sidebar ── */}
-        <aside className="sidebar">
-          <div className="sidebar-brand">Access</div>
-          <nav className="sidebar-nav">
-            <a href="/dashboard" className="nav-item">← Dashboard</a>
-            <a href="/dashboard/calendar" className="nav-item nav-item-active">📅 Calendar</a>
-          </nav>
-          <div className="sidebar-foot">
-            <div className="sidebar-user">{session?.user?.email}</div>
-          </div>
-        </aside>
+        <Sidebar session={session} />
 
         {/* ── Main ── */}
-        <main className="cal-main">
+        <main className="main-content">
+          <header className="content-header">
+            <div>
+              <h1 className="header-title">Calendar & Booking</h1>
+              <p className="header-subtitle">Reserve supercomputer compute slots and view scheduled allocations.</p>
+            </div>
+            <div className="header-actions">
+              <button className="btn-book" onClick={openModalEmpty}>
+                + Book Slot
+              </button>
+            </div>
+          </header>
+
           {/* ── Toolbar ── */}
           <div className="toolbar">
             <div className="toolbar-left">
@@ -751,55 +755,44 @@ const css = `
   }
 
   /* ── Layout ── */
-  .cal-page {
+  .dash-layout {
     display: flex;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
     background: var(--bg);
     font-family: var(--font);
     color: var(--text);
   }
 
-  /* ── Sidebar ── */
-  .sidebar {
-    width: 220px;
-    flex-shrink: 0;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
+  .main-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    background-color: var(--bg);
     display: flex;
     flex-direction: column;
-    padding: 1.5rem 1rem;
+    gap: 1.5rem;
+  }
+
+  .content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
     gap: 1rem;
+    flex-wrap: wrap;
   }
-  .sidebar-brand {
-    font-size: 1.1rem;
+
+  .header-title {
+    font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text);
     letter-spacing: -0.02em;
-    padding: 0 0.5rem;
+    color: var(--text);
   }
-  .sidebar-nav { display: flex; flex-direction: column; gap: 0.25rem; }
-  .nav-item {
-    display: block;
-    padding: 0.5rem 0.75rem;
-    border-radius: 6px;
+
+  .header-subtitle {
     font-size: 0.875rem;
     color: var(--text2);
-    text-decoration: none;
-    transition: background 0.15s, color 0.15s;
-  }
-  .nav-item:hover { background: var(--surface3); color: var(--text); }
-  .nav-item-active { background: #111111 !important; color: #ffffff !important; font-weight: 500; }
-  .sidebar-foot { margin-top: auto; padding: 0 0.5rem; }
-  .sidebar-user { font-size: 0.75rem; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  /* ── Main ── */
-  .cal-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    background: var(--bg);
+    margin-top: 0.25rem;
   }
 
   /* ── Toolbar ── */

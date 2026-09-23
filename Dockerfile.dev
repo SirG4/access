@@ -1,0 +1,28 @@
+# ==============================================================================
+# Access Portal — Next.js Application Development Dockerfile
+# ==============================================================================
+# Fast development build using node:20-alpine
+# ==============================================================================
+
+FROM node:20-alpine AS dev
+WORKDIR /app
+
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Copy dependency manifests
+COPY package.json package-lock.json* ./
+
+# Install dependencies using cache
+RUN --mount=type=cache,target=/root/.npm npm ci
+
+# Copy application source code
+COPY . .
+
+# Expose Next.js dev port
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["npm", "run", "dev"]

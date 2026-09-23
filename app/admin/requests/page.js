@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Sidebar from "@/app/components/Sidebar";
 
 /* ─── helpers ─────────────────────────────────────────────────────────── */
 function formatDate(iso) {
@@ -418,10 +419,10 @@ export default function AdminRequestsPage() {
   const fetchRequests = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/requests");
+      const res = await fetch("/api/requests?adminView=true");
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      setRequests(data);
+      setRequests(Array.isArray(data) ? data : (data.requests || []));
     } catch (err) {
       setError("Failed to load requests. " + err.message);
     } finally {
@@ -582,35 +583,23 @@ export default function AdminRequestsPage() {
         />
       )}
 
-      <div className="page">
-        <div className="container">
+      <div className="dash-layout">
+        <Sidebar session={session} />
+        <main className="main-content">
           {/* Header */}
-          <div className="page-header">
+          <header className="content-header">
             <div>
-              <p className="wordmark">Access</p>
-              <h1>Request Review</h1>
-              <p className="sub">
-                Approve or reject supercomputer slot requests
+              <h1 className="header-title">Review Access Requests</h1>
+              <p className="header-subtitle">
+                Manage and approve supercomputer slot requests
               </p>
             </div>
-            <div className="header-nav">
-              <Link href="/admin/requests" className="nav-link nav-link-active">
-                Requests
-              </Link>
-              <Link href="/admin/containers" className="nav-link">
-                Containers
-              </Link>
-              <Link href="/admin/audit-logs" className="nav-link">
-                Audit Logs
-              </Link>
-              <Link href="/admin/users" className="nav-link">
-                Users
-              </Link>
-              <Link href="/dashboard" className="nav-link">
-                Dashboard
-              </Link>
+            <div className="header-actions">
+              <button className="btn-refresh" onClick={fetchRequests} disabled={loading} type="button" id="refresh-btn">
+                {loading ? "Refreshing..." : "⟳ Refresh"}
+              </button>
             </div>
-          </div>
+          </header>
 
           {/* Error banner */}
           {error && (
@@ -670,16 +659,8 @@ export default function AdminRequestsPage() {
             <span className="footer-count">
               {filtered.length} {filtered.length === 1 ? "request" : "requests"} shown
             </span>
-            <button
-              className="btn-refresh"
-              onClick={fetchRequests}
-              type="button"
-              id="refresh-btn"
-            >
-              ↻ Refresh
-            </button>
           </div>
-        </div>
+        </main>
       </div>
     </>
   );
@@ -691,84 +672,64 @@ const pageStyles = `
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body { background: #f5f5f7; }
+  body { background: #fafafa; }
 
-  .page {
-    min-height: 100vh;
-    background: #f5f5f7;
-    font-family: 'Inter', system-ui, sans-serif;
-    padding: 2rem 1rem;
-  }
-
-  .container {
-    max-width: 780px;
-    margin: 0 auto;
-  }
-
-  /* ── header ─────────── */
-  .page-header {
+  .dash-layout {
     display: flex;
-    align-items: flex-start;
+    min-height: 100vh;
+    background-color: #fafafa;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .main-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    background-color: #fafafa;
+  }
+
+  .content-header {
+    display: flex;
+    align-items: center;
     justify-content: space-between;
     margin-bottom: 2rem;
     gap: 1rem;
     flex-wrap: wrap;
   }
 
-  .wordmark {
-    font-size: 0.875rem;
+  .header-title {
+    font-size: 1.5rem;
     font-weight: 700;
-    color: #111;
-    letter-spacing: -0.01em;
-    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+    color: #111111;
   }
 
-  h1 {
-    font-size: 1.65rem;
-    font-weight: 700;
-    color: #111;
-    letter-spacing: -0.03em;
-    line-height: 1.2;
-    margin-bottom: 0.25rem;
-  }
-
-  .sub {
+  .header-subtitle {
     font-size: 0.875rem;
-    color: #888;
+    color: #555555;
+    margin-top: 0.25rem;
   }
 
-  .header-nav {
+  .header-actions {
     display: flex;
-    gap: 1rem;
     align-items: center;
-    padding-top: 0.25rem;
-    flex-shrink: 0;
+    gap: 0.75rem;
   }
 
-  .nav-link {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: #555;
-    text-decoration: none;
-    padding: 0.4rem 0.8rem;
-    border: 1px solid #ddd;
+  .btn-refresh {
+    padding: 0.55rem 0.9rem;
     border-radius: 6px;
-    background: #fff;
-    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    color: #111111;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
   }
-  .nav-link:hover {
+
+  .btn-refresh:hover {
     background: #f5f5f5;
-    border-color: #ccc;
-    color: #111;
-  }
-  .nav-link-active {
-    background: #111;
-    color: #fff;
-    border-color: #111;
-  }
-  .nav-link-active:hover {
-    background: #333;
-    color: #fff;
   }
 
   /* ── error banner ───── */

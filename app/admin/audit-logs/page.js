@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Sidebar from "@/app/components/Sidebar";
 
 function formatDate(iso) {
   if (!iso) return "—";
@@ -107,35 +108,29 @@ export default function AdminAuditLogsPage() {
   return (
     <>
       <style>{styles}</style>
-      <div className="page">
-        <div className="container">
+      <div className="dash-layout">
+        <Sidebar session={session} />
+        <main className="main-content">
           {/* Header */}
-          <div className="page-header">
+          <header className="content-header">
             <div>
-              <p className="wordmark">Access</p>
-              <h1>Audit & Security Logs</h1>
-              <p className="sub">
+              <h1 className="header-title">Audit Logs</h1>
+              <p className="header-subtitle">
                 Immutable chronological log of administrative and system events
               </p>
             </div>
-            <div className="header-nav">
-              <Link href="/admin/requests" className="nav-link">
-                Requests
-              </Link>
-              <Link href="/admin/containers" className="nav-link">
-                Containers
-              </Link>
-              <Link href="/admin/audit-logs" className="nav-link nav-link-active">
-                Audit Logs
-              </Link>
-              <Link href="/admin/users" className="nav-link">
-                Users
-              </Link>
-              <Link href="/dashboard" className="nav-link">
-                Dashboard
-              </Link>
+            <div className="header-actions">
+              <button
+                onClick={fetchLogs}
+                className="btn-refresh"
+                type="button"
+                id="refresh-logs-btn"
+                disabled={loading}
+              >
+                {loading ? "Refreshing..." : "⟳ Refresh Logs"}
+              </button>
             </div>
-          </div>
+          </header>
 
           {/* Filters & Actions */}
           <div className="filter-bar">
@@ -164,15 +159,6 @@ export default function AdminAuditLogsPage() {
                 <option value="SYSTEM_SYNC_RECOVERY">Recovery Sync</option>
               </select>
             </div>
-
-            <button
-              onClick={fetchLogs}
-              className="btn-refresh"
-              type="button"
-              id="refresh-logs-btn"
-            >
-              ↻ Refresh Logs
-            </button>
           </div>
 
           {error && (
@@ -252,7 +238,7 @@ export default function AdminAuditLogsPage() {
               </button>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </>
   );
@@ -262,71 +248,47 @@ const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #fafafa; }
-  .page {
-    min-height: 100vh;
-    background: #fafafa;
-    font-family: 'Inter', system-ui, sans-serif;
-    padding: 2rem 1rem;
-  }
-  .container {
-    max-width: 1050px;
-    margin: 0 auto;
-  }
-  .page-header {
+
+  .dash-layout {
     display: flex;
-    align-items: flex-start;
+    min-height: 100vh;
+    background-color: #fafafa;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .main-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    background-color: #fafafa;
+  }
+
+  .content-header {
+    display: flex;
+    align-items: center;
     justify-content: space-between;
     margin-bottom: 2rem;
     gap: 1rem;
     flex-wrap: wrap;
   }
-  .wordmark {
-    font-size: 0.875rem;
+
+  .header-title {
+    font-size: 1.5rem;
     font-weight: 700;
-    color: #111;
-    margin-bottom: 0.35rem;
+    letter-spacing: -0.02em;
+    color: #111111;
   }
-  h1 {
-    font-size: 1.65rem;
-    font-weight: 700;
-    color: #111;
-    letter-spacing: -0.03em;
-    margin-bottom: 0.25rem;
-  }
-  .sub {
+
+  .header-subtitle {
     font-size: 0.875rem;
-    color: #777;
+    color: #555555;
+    margin-top: 0.25rem;
   }
-  .header-nav {
+
+  .header-actions {
     display: flex;
-    gap: 0.75rem;
     align-items: center;
-    flex-wrap: wrap;
-  }
-  .nav-link {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: #555;
-    text-decoration: none;
-    padding: 0.4rem 0.8rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background: #fff;
-    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-  }
-  .nav-link:hover {
-    background: #f5f5f5;
-    border-color: #ccc;
-    color: #111;
-  }
-  .nav-link-active {
-    background: #111;
-    color: #fff;
-    border-color: #111;
-  }
-  .nav-link-active:hover {
-    background: #333;
-    color: #fff;
+    gap: 0.75rem;
   }
   .filter-bar {
     display: flex;

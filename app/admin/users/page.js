@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Sidebar from "@/app/components/Sidebar";
 
 export default function AdminUsersPage() {
   const { data: session, status } = useSession();
@@ -163,66 +164,51 @@ export default function AdminUsersPage() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #fafafa; }
 
-        .page {
-          min-height: 100vh;
+        .dash-layout {
           display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #fafafa;
+          min-height: 100vh;
+          background-color: #fafafa;
           font-family: 'Inter', system-ui, sans-serif;
-          padding: 2rem 1rem;
         }
 
-        .card {
+        .main-content {
+          flex: 1;
+          padding: 2rem;
+          overflow-y: auto;
+          background-color: #fafafa;
+        }
+
+        .content-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 2rem;
+          gap: 1rem;
+          flex-wrap: wrap;
+        }
+
+        .header-title {
+          font-size: 1.5rem;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          color: #111111;
+        }
+
+        .header-subtitle {
+          font-size: 0.875rem;
+          color: #555555;
+          margin-top: 0.25rem;
+        }
+
+        .surface-card {
           width: 100%;
-          max-width: 780px;
-          padding: 2.5rem 2rem;
-          margin: 1rem auto;
+          padding: 2rem;
           background: #ffffff;
           border: 1px solid #e5e5e5;
           border-radius: 12px;
           box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-        }
-
-        .header-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 2.5rem;
-        }
-
-        .wordmark {
-          font-size: 0.9375rem;
-          font-weight: 600;
-          color: #111;
-          letter-spacing: -0.01em;
-        }
-
-        .nav-link {
-          font-size: 0.8125rem;
-          font-weight: 500;
-          color: #555;
-          text-decoration: none;
-          padding: 0.4rem 0.8rem;
-          border-radius: 6px;
-          background: #fff;
-          border: 1px solid #ddd;
-          transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-        }
-
-        .nav-link:hover {
-          background: #f5f5f5;
-          border-color: #ccc;
-          color: #111;
-        }
-
-        .nav-link-active {
-          background: #111;
-          color: #fff;
-          border-color: #111;
-          font-weight: 600;
         }
 
         h1 {
@@ -485,31 +471,15 @@ export default function AdminUsersPage() {
         .btn-modal-delete-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
       `}</style>
 
-      <div className="page">
-        <div className="card">
-          <div className="header-row">
-            <p className="wordmark">Access</p>
-            <div className="header-nav" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <Link href="/admin/requests" className="nav-link">
-                Requests
-              </Link>
-              <Link href="/admin/containers" className="nav-link">
-                Containers
-              </Link>
-              <Link href="/admin/audit-logs" className="nav-link">
-                Audit Logs
-              </Link>
-              <Link href="/admin/users" className="nav-link nav-link-active">
-                Users
-              </Link>
-              <Link href="/dashboard" className="nav-link">
-                Dashboard
-              </Link>
+      <div className="dash-layout">
+        <Sidebar session={session} />
+        <main className="main-content">
+          <header className="content-header">
+            <div>
+              <h1 className="header-title">User Management</h1>
+              <p className="header-subtitle">Manage user accounts, permissions, and roles</p>
             </div>
-          </div>
-
-          <h1>User management</h1>
-          <p className="sub">Manage user accounts, permissions, and roles</p>
+          </header>
 
           {error && (
             <p className="error-msg" role="alert">
@@ -523,103 +493,102 @@ export default function AdminUsersPage() {
             </p>
           )}
 
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Role</th>
-                  <th>Provider</th>
-                  <th style={{ textAlign: "right" }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((u) => {
-                  const isSelf = u._id === session?.user?.id;
-                  const isCurrentAction = actionLoading === u._id;
+          <div className="surface-card">
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Provider</th>
+                    <th style={{ textAlign: "right" }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((u) => {
+                    const isSelf = u._id === session?.user?.id;
+                    const isCurrentAction = actionLoading === u._id;
 
-                  return (
-                    <tr key={u._id}>
-                      <td>
-                        <div className="user-email-cell">
-                          <span>{u.email}</span>
-                          {isSelf && <span className="badge-self">You</span>}
-                        </div>
-                      </td>
-                      <td>
-                        <span
-                          className={`badge-role ${
-                            u.role === "admin" ? "badge-admin" : "badge-user"
-                          }`}
-                        >
-                          {u.role}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="provider-text">{u.provider}</span>
-                      </td>
-                      <td>
-                        <div className="actions">
-                          {u.role === "user" ? (
-                            <button
-                              id={`promote-btn-${u._id}`}
-                              className="btn-action btn-make-admin"
-                              type="button"
-                              onClick={() => handleRoleChange(u._id, "admin")}
-                              disabled={isCurrentAction}
-                            >
-                              Make admin
-                            </button>
-                          ) : (
-                            <button
-                              id={`demote-btn-${u._id}`}
-                              className="btn-action btn-demote"
-                              type="button"
-                              onClick={() => handleRoleChange(u._id, "user")}
-                              disabled={isSelf || isCurrentAction}
-                              title={isSelf ? "Cannot demote yourself" : "Demote to user"}
-                            >
-                              Demote
-                            </button>
-                          )}
-                          <button
-                            id={`delete-btn-${u._id}`}
-                            className="btn-action btn-delete"
-                            type="button"
-                            onClick={() => triggerDeleteModal(u._id, u.email)}
-                            disabled={isSelf || isCurrentAction}
-                            title={isSelf ? "Cannot delete yourself" : "Delete user"}
+                    return (
+                      <tr key={u._id}>
+                        <td>
+                          <div className="user-email-cell">
+                            <span>{u.email}</span>
+                            {isSelf && <span className="badge-self">You</span>}
+                          </div>
+                        </td>
+                        <td>
+                          <span
+                            className={`badge-role ${
+                              u.role === "admin" ? "badge-admin" : "badge-user"
+                            }`}
                           >
-                            Delete
-                          </button>
-                        </div>
+                            {u.role}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="provider-text">{u.provider}</span>
+                        </td>
+                        <td>
+                          <div className="actions">
+                            {u.role === "user" ? (
+                              <button
+                                id={`promote-btn-${u._id}`}
+                                className="btn-action btn-make-admin"
+                                type="button"
+                                onClick={() => handleRoleChange(u._id, "admin")}
+                                disabled={isCurrentAction}
+                              >
+                                Make admin
+                              </button>
+                            ) : (
+                              <button
+                                id={`demote-btn-${u._id}`}
+                                className="btn-action btn-demote"
+                                type="button"
+                                onClick={() => handleRoleChange(u._id, "user")}
+                                disabled={isSelf || isCurrentAction}
+                                title={isSelf ? "Cannot demote yourself" : "Demote to user"}
+                              >
+                                Demote
+                              </button>
+                            )}
+                            <button
+                              id={`delete-btn-${u._id}`}
+                              className="btn-action btn-delete"
+                              type="button"
+                              onClick={() => triggerDeleteModal(u._id, u.email)}
+                              disabled={isSelf || isCurrentAction}
+                              title={isSelf ? "Cannot delete yourself" : "Delete user"}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+
+                  {users.length === 0 && (
+                    <tr>
+                      <td colSpan="4" className="empty-row">
+                        No users found.
                       </td>
                     </tr>
-                  );
-                })}
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-                {users.length === 0 && (
-                  <tr>
-                    <td colSpan="4" className="empty-row">
-                      No users found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            <div className="divider" />
+
+            <div className="footer-row">
+              <span className="user-count">
+                {users.length} {users.length === 1 ? "user" : "users"} registered
+              </span>
+            </div>
           </div>
-
-          <div className="divider" />
-
-          <div className="footer-row">
-            <span className="user-count">
-              {users.length} {users.length === 1 ? "user" : "users"} registered
-            </span>
-            <Link href="/dashboard" className="nav-link">
-              Back to dashboard
-            </Link>
-          </div>
-        </div>
+        </main>
       </div>
 
       {/* Delete User Confirmation Modal */}

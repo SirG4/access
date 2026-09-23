@@ -242,7 +242,7 @@ function TerminateModal({ request, onConfirm, onClose, loading }) {
       `}</style>
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-          <p className="modal-title-danger">⚡ Force Terminate Active Session</p>
+          <p className="modal-title-danger">Force Terminate Active Session</p>
           <p className="modal-meta">
             <strong>{request.title || request.purpose || "Active Session"}</strong>
             <br />
@@ -359,7 +359,7 @@ function RequestCard({ request, onApprove, onReject, onTerminate, actionLoading 
             disabled={isLoading}
             onClick={() => onApprove(request._id)}
           >
-            {isLoading ? "…" : "✓ Approve"}
+            {isLoading ? "…" : "Approve"}
           </button>
           <button
             id={`reject-btn-${request._id}`}
@@ -382,7 +382,7 @@ function RequestCard({ request, onApprove, onReject, onTerminate, actionLoading 
             disabled={isLoading}
             onClick={() => onTerminate(request)}
           >
-            ⚡ Force Terminate Session
+            Force Terminate Session
           </button>
         </div>
       )}
@@ -596,7 +596,7 @@ export default function AdminRequestsPage() {
             </div>
             <div className="header-actions">
               <button className="btn-refresh" onClick={fetchRequests} disabled={loading} type="button" id="refresh-btn">
-                {loading ? "Refreshing..." : "⟳ Refresh"}
+                {loading ? "Refreshing..." : "Refresh"}
               </button>
             </div>
           </header>
@@ -604,7 +604,7 @@ export default function AdminRequestsPage() {
           {/* Error banner */}
           {error && (
             <div className="error-banner" role="alert">
-              <span>⚠ {error}</span>
+              <span>{error}</span>
               <button onClick={() => setError("")}>×</button>
             </div>
           )}
@@ -633,7 +633,9 @@ export default function AdminRequestsPage() {
           <div className="req-list">
             {filtered.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-icon">📋</div>
+                <div className="empty-icon">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                </div>
                 <p className="empty-title">No {activeTab === "all" ? "" : activeTab} requests</p>
                 <p className="empty-sub">
                   {activeTab === "pending"
@@ -916,7 +918,7 @@ const pageStyles = `
     padding: 0.45rem 1.1rem;
     border: none;
     border-radius: 8px;
-    background: #111;
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
     color: #fff;
     font-size: 0.875rem;
     font-weight: 600;
@@ -924,9 +926,10 @@ const pageStyles = `
     cursor: pointer;
     transition: background 0.15s;
     letter-spacing: -0.01em;
+    box-shadow: 0 2px 8px rgba(29, 78, 216, 0.25);
   }
 
-  .btn-approve:hover:not(:disabled) { background: #333; }
+  .btn-approve:hover:not(:disabled) { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); box-shadow: 0 4px 12px rgba(29, 78, 216, 0.35); }
   .btn-approve:disabled { opacity: 0.4; cursor: not-allowed; }
 
   .btn-reject {
@@ -955,7 +958,9 @@ const pageStyles = `
   }
 
   .empty-icon {
-    font-size: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 0.875rem;
   }
 
@@ -1018,7 +1023,7 @@ const pageStyles = `
     white-space: nowrap;
   }
   @keyframes toastIn { from { opacity:0; transform: translateX(-50%) translateY(10px) } to { opacity:1; transform: translateX(-50%) translateY(0) } }
-  .toast-success { background: #111; color: #fff; }
+  .toast-success { background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); color: #fff; }
   .toast-info { background: #1e40af; color: #fff; }
   .toast-error { background: #dc2626; color: #fff; }
 `;

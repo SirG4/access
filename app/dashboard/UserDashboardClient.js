@@ -176,7 +176,7 @@ export default function UserDashboardClient({ session }) {
             </div>
             <div className="header-actions">
               <button className="btn-refresh" onClick={fetchRequests} disabled={loading}>
-                {loading ? "Refreshing..." : "⟳ Refresh Status"}
+                {loading ? "Refreshing..." : "Refresh Status"}
               </button>
               <Link href="/dashboard/calendar" className="btn-book">
                 + Book New Slot
@@ -185,7 +185,7 @@ export default function UserDashboardClient({ session }) {
           </header>
 
           {/* Toast Notification */}
-          {toast && <div className="toast-banner">✓ {toast}</div>}
+          {toast && <div className="toast-banner">{toast}</div>}
 
           {/* ── ACTIVE SESSION CARD (PRIMARY HIGHLIGHT) ── */}
           {activeRequest ? (
@@ -219,8 +219,11 @@ export default function UserDashboardClient({ session }) {
               {/* SSH Credentials Panel */}
               <div className="credentials-panel">
                 <div className="panel-title">
-                  <span>🔑 Live SSH Credentials & Connection</span>
-                  <span className="anywhere-badge">🌐 SSH from anywhere</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="7" cy="17" r="3"/><circle cx="17" cy="7" r="3"/><path d="M9.5 14.5l5-5"/></svg>
+                    Live SSH Credentials &amp; Connection
+                  </span>
+                  <span className="anywhere-badge">SSH from anywhere</span>
                 </div>
 
                 {/* IP Hero Row — prominent credential display */}
@@ -230,7 +233,9 @@ export default function UserDashboardClient({ session }) {
                     <div className="ip-hero-value-row">
                       <span className="ip-hero-val" id="ssh-host-display">{sshHost}</span>
                       <button className="btn-icon-copy ip-copy-btn" onClick={() => handleCopy(sshHost, "host")} title="Copy IP">
-                        {copiedKey === "host" ? "✓" : "📋"}
+                        {copiedKey === "host" ? "✓" : (
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -241,7 +246,9 @@ export default function UserDashboardClient({ session }) {
                       <span className="ip-hero-val" id="ssh-port-display">{sshPort || "—"}</span>
                       {sshPort && (
                         <button className="btn-icon-copy ip-copy-btn" onClick={() => handleCopy(String(sshPort), "port")} title="Copy Port">
-                          {copiedKey === "port" ? "✓" : "📋"}
+                          {copiedKey === "port" ? "✓" : (
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                          )}
                         </button>
                       )}
                     </div>
@@ -253,7 +260,9 @@ export default function UserDashboardClient({ session }) {
                       <span className="ip-hero-val" id="ssh-user-display">{sshUser || "—"}</span>
                       {sshUser && (
                         <button className="btn-icon-copy ip-copy-btn" onClick={() => handleCopy(sshUser, "user")} title="Copy Username">
-                          {copiedKey === "user" ? "✓" : "📋"}
+                          {copiedKey === "user" ? "✓" : (
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                          )}
                         </button>
                       )}
                     </div>
@@ -275,7 +284,9 @@ export default function UserDashboardClient({ session }) {
                         </button>
                         {showPassword && (
                           <button className="btn-icon-copy ip-copy-btn" onClick={() => handleCopy(sshPassword, "pwd")} title="Copy Password">
-                            {copiedKey === "pwd" ? "✓" : "📋"}
+                            {copiedKey === "pwd" ? "✓" : (
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            )}
                           </button>
                         )}
                       </div>
@@ -302,10 +313,10 @@ export default function UserDashboardClient({ session }) {
 
                 <div className="system-notes">
                   <div className="note-row">
-                    <span>💡 <strong>Persistent Storage:</strong> Work in <code>/workspace</code> — files saved here persist across all your sessions.</span>
+                    <span><strong>Persistent Storage:</strong> Work in <code>/workspace</code> — files saved here persist across all your sessions.</span>
                   </div>
                   <div className="note-row">
-                    <span>⚠️ <strong>Auto-Shutdown:</strong> At session end, this container will stop automatically. Export unsaved output files before timer expires.</span>
+                    <span><strong>Auto-Shutdown:</strong> At session end, this container will stop automatically. Export unsaved output files before timer expires.</span>
                   </div>
                 </div>
               </div>
@@ -319,7 +330,9 @@ export default function UserDashboardClient({ session }) {
               if (upcoming) {
                 return (
                   <section className="upcoming-banner">
-                    <div className="banner-icon">📅</div>
+                    <div className="banner-icon">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
                     <div className="banner-content">
                       <span className="banner-badge">NEXT SCHEDULED SESSION</span>
                       <h3 className="banner-title">{upcoming.title || "Approved Access Slot"}</h3>
@@ -334,7 +347,9 @@ export default function UserDashboardClient({ session }) {
               if (recentlyConcluded) {
                 return (
                   <section className="concluded-banner">
-                    <div className="banner-icon">✅</div>
+                    <div className="banner-icon">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
                     <div className="banner-content">
                       <span className="banner-badge-completed">SESSION CONCLUDED</span>
                       <h3 className="banner-title">Your latest session has ended</h3>
@@ -351,7 +366,9 @@ export default function UserDashboardClient({ session }) {
 
               return (
                 <section className="no-access-hero">
-                  <div className="no-access-icon">🖥️</div>
+                  <div className="no-access-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  </div>
                   <h2>No Active Container Session</h2>
                   <p>You currently do not have an active or scheduled supercomputer access slot. Book a time slot on the interactive calendar to get instant container access.</p>
                   <Link href="/dashboard/calendar" className="btn-book-large" id="hero-book-btn">
@@ -495,15 +512,16 @@ const css = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #fafafa;
+    --bg: #f8fafc;
     --surface: #ffffff;
-    --surface-elevated: #f5f5f7;
-    --surface-border: #e5e5e5;
-    --text-primary: #111111;
-    --text-secondary: #555555;
-    --text-muted: #888888;
-    --accent: #111111;
-    --accent-glow: rgba(0, 0, 0, 0.05);
+    --surface-elevated: #f1f5f9;
+    --surface-border: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent: #1d4ed8;
+    --accent-hover: #2563eb;
+    --accent-glow: rgba(29, 78, 216, 0.12);
     --font-sans: 'Inter', system-ui, sans-serif;
     --font-mono: 'Fira Code', monospace;
   }
@@ -524,8 +542,8 @@ const css = `
   /* ── Sidebar ── */
   .sidebar {
     width: 260px;
-    background: #ffffff;
-    border-right: 1px solid var(--surface-border);
+    background: #07172f;
+    border-right: 1px solid rgba(255,255,255,0.06);
     display: flex;
     flex-direction: column;
     padding: 1.5rem 1rem;
@@ -583,14 +601,15 @@ const css = `
   }
 
   .nav-link:hover {
-    background: #f5f5f5;
-    color: var(--text-primary);
+    background: rgba(255,255,255,0.07);
+    color: #e2e8f0;
   }
 
   .nav-link.active {
-    background: #111111;
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
     color: #ffffff;
     font-weight: 600;
+    box-shadow: 0 2px 8px rgba(29, 78, 216, 0.3);
   }
 
   .nav-icon {
@@ -615,7 +634,7 @@ const css = `
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #111111;
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
     color: #ffffff;
     font-weight: 700;
     display: flex;
@@ -623,6 +642,7 @@ const css = `
     justify-content: center;
     font-size: 0.875rem;
     flex-shrink: 0;
+    border: 1px solid rgba(59, 130, 246, 0.4);
   }
 
   .user-info {
@@ -632,7 +652,7 @@ const css = `
   .user-email {
     font-size: 0.8125rem;
     font-weight: 600;
-    color: var(--text-primary);
+    color: #e2e8f0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -721,34 +741,38 @@ const css = `
     gap: 0.35rem;
     padding: 0.55rem 1.1rem;
     border-radius: 6px;
-    background: #111111;
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
     color: #ffffff;
     font-weight: 600;
     font-size: 0.8125rem;
     text-decoration: none;
     transition: all 0.15s ease;
+    box-shadow: 0 2px 8px rgba(29, 78, 216, 0.25);
   }
 
   .btn-book:hover {
-    background: #333333;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.35);
   }
 
   .btn-book-large {
     display: inline-flex;
     align-items: center;
     padding: 0.8rem 1.5rem;
-    border-radius: 6px;
-    background: #111111;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
     color: #ffffff;
     font-weight: 600;
     font-size: 0.9375rem;
     text-decoration: none;
     margin-top: 1.25rem;
     transition: all 0.15s ease;
+    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
   }
 
   .btn-book-large:hover {
-    background: #333333;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 6px 16px rgba(29, 78, 216, 0.4);
   }
 
   .toast-banner {
@@ -766,8 +790,8 @@ const css = `
   .active-card-hero {
     background: #ffffff;
     border: 1px solid var(--surface-border);
-    border-left: 4px solid #111111;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid #1d4ed8;
+    box-shadow: 0 2px 12px rgba(29, 78, 216, 0.08);
     border-radius: 12px;
     padding: 1.75rem;
     margin-bottom: 2rem;
@@ -870,7 +894,7 @@ const css = `
 
   .progress-bar {
     height: 100%;
-    background: #111111;
+    background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%);
     border-radius: 3px;
     transition: width 1s linear;
   }
@@ -1001,9 +1025,9 @@ const css = `
   }
 
   .btn-copy:hover {
-    background: #111111;
+    background: #1d4ed8;
     color: #ffffff;
-    border-color: #111111;
+    border-color: #1d4ed8;
   }
 
   .cred-grid {
@@ -1150,7 +1174,10 @@ const css = `
   .concluded-banner { border-left: 4px solid #6b7280; }
 
   .banner-icon {
-    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
   .banner-content { flex: 1; }
@@ -1195,7 +1222,9 @@ const css = `
   }
 
   .no-access-icon {
-    font-size: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 1rem;
   }
 

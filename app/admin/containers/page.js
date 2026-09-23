@@ -142,13 +142,13 @@ function DeleteModal({ container, onConfirm, onClose, loading }) {
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal-box" onClick={(e) => e.stopPropagation()}>
           <div className="modal-title">
-            <span>🗑 Delete Container & Cleanup Data</span>
+            <span>Delete Container &amp; Cleanup Data</span>
           </div>
           <div className="modal-body">
             Are you sure you want to remove container <strong>{container.containerName}</strong> ({container.containerId?.slice(0, 12)})?
           </div>
           <div className="modal-warning">
-            <strong>⚠️ PERMANENT STORAGE DATA LOSS WARNING</strong>
+            <strong>PERMANENT STORAGE DATA LOSS WARNING</strong>
             This action will permanently remove the Docker container and delete persistent volume <code>{container.volumeName || 'associated volume'}</code>. All stored user files will be unrecoverable.
           </div>
           <div className="modal-actions">
@@ -371,7 +371,7 @@ export default function AdminContainersPage() {
           {/* Error Banner */}
           {error && (
             <div className="error-banner" role="alert">
-              <span>⚠ {error}</span>
+              <span>{error}</span>
               <button onClick={() => setError("")}>×</button>
             </div>
           )}
@@ -417,7 +417,9 @@ export default function AdminContainersPage() {
           <div className="container-list">
             {filtered.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-icon">🐳</div>
+                <div className="empty-icon">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                </div>
                 <p className="empty-title">No containers found</p>
                 <p className="empty-sub">
                   {containers.length === 0
@@ -446,15 +448,15 @@ export default function AdminContainersPage() {
                           {isActionLoading
                             ? "Processing..."
                             : isRunning
-                            ? "⏹ Force Stop"
-                            : "▶ Force Start"}
+                            ? "Force Stop"
+                            : "Force Start"}
                         </button>
                         <button
                           className="btn-action btn-delete"
                           onClick={() => setDeleteTarget(item)}
                           disabled={isActionLoading}
                         >
-                          🗑 Delete & Cleanup
+                          Delete &amp; Cleanup
                         </button>
                       </div>
                     </div>
@@ -830,7 +832,7 @@ const pageStyles = `
     border: 1px dashed #ddd;
   }
 
-  .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .empty-icon { display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem; }
   .empty-title { font-size: 1.1rem; font-weight: 700; color: #222; }
   .empty-sub { font-size: 0.875rem; color: #777; margin-top: 0.25rem; }
 
@@ -854,6 +856,6 @@ const pageStyles = `
     z-index: 999;
     animation: fadeIn 0.2s ease;
   }
-  .toast-success { background: #111; color: #fff; }
+  .toast-success { background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); color: #fff; }
   .toast-error { background: #dc2626; color: #fff; }
 `;

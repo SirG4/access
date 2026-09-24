@@ -82,6 +82,10 @@ export async function GET() {
         }
       }
 
+      const ramLimitGB = details.ramLimitGB || Number(dockerInfo?.Labels?.['access.ramLimitGB']) || 8;
+      const gpuRamLimitGB = details.gpuRamLimitGB || Number(dockerInfo?.Labels?.['access.gpuRamLimitGB']) || 8;
+      const storageLimitGB = details.storageLimitGB || Number(dockerInfo?.Labels?.['access.storageLimitGB']) || 100;
+
       containerList.push({
         id: cId,
         containerId: cId,
@@ -91,6 +95,9 @@ export async function GET() {
         sshUser: details.sshUser,
         sshPassword: details.sshPassword,
         volumeName: details.volumeName,
+        ramLimitGB,
+        gpuRamLimitGB,
+        storageLimitGB,
         status: liveStatus,
         slotRequestId: req._id,
         slotTitle: req.title,
@@ -131,6 +138,9 @@ export async function GET() {
       const rawPort = labels['access.port'];
       const sshPort = rawPort ? Number(rawPort) : dc.Ports?.[0]?.PublicPort || null;
       const cName = dc.Names?.[0] ? dc.Names[0].replace(/^\//, '') : dc.Id.slice(0, 12);
+      const ramLimitGB = Number(labels['access.ramLimitGB']) || 8;
+      const gpuRamLimitGB = Number(labels['access.gpuRamLimitGB']) || 8;
+      const storageLimitGB = Number(labels['access.storageLimitGB']) || 100;
 
       containerList.push({
         id: dc.Id,
@@ -141,6 +151,9 @@ export async function GET() {
         sshUser: labels['access.username'] || 'user',
         sshPassword: null,
         volumeName: labels['access.volumeName'] || null,
+        ramLimitGB,
+        gpuRamLimitGB,
+        storageLimitGB,
         status: dc.State === 'running' ? 'running' : 'stopped',
         slotRequestId: null,
         slotTitle: 'Orphaned / Standalone Container',

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -52,116 +52,209 @@ function StatusBadge({ status }) {
   );
 }
 
+/* ─── Real-Time SVG Sparkline / Usage Graph Component ─────────────────── */
+function ResourceGraph({ title, usedGB, limitGB, percent, history = [], color = "#2563eb", unit = "GB", subtitle }) {
+  const points = history.length > 0 ? history : [0];
+  const width = 280;
+  const height = 65;
+  const padding = 6;
+
+  const len = points.length;
+  const pathD = points
+    .map((val, idx) => {
+      const x = padding + (idx / Math.max(1, len - 1)) * (width - padding * 2);
+      const clampedVal = Math.min(100, Math.max(0, val));
+      const y = height - padding - (clampedVal / 100) * (height - padding * 2);
+      return `${idx === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
+    })
+    .join(" ");
+
+  const areaD = `${pathD} L ${(width - padding).toFixed(1)} ${height} L ${padding} ${height} Z`;
+
+  const lastVal = points[points.length - 1] || 0;
+  const lastX = padding + ((points.length - 1) / Math.max(1, points.length - 1)) * (width - padding * 2);
+  const lastY = height - padding - (Math.min(100, Math.max(0, lastVal)) / 100) * (height - padding * 2);
+
+  const gradientId = `grad-${title.replace(/[^a-zA-Z0-9]/g, "")}`;
+
+  return (
+    <div className="graph-card">
+      <div className="graph-header">
+        <div>
+          <span className="graph-title">{title}</span>
+          {subtitle && <span className="graph-sub">{subtitle}</span>}
+        </div>
+        <div className="graph-badge" style={{ color, borderColor: `${color}40`, backgroundColor: `${color}10` }}>
+          {usedGB} / {limitGB} {unit} ({percent}%)
+        </div>
+      </div>
+      <div className="graph-svg-container">
+        <svg viewBox={`0 0 ${width} ${height}`} className="graph-svg" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+              <stop offset="100%" stopColor={color} stopOpacity="0.0" />
+            </linearGradient>
+          </defs>
+          <path d={areaD} fill={`url(#${gradientId})`} />
+          <path d={pathD} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          {len > 0 && (
+            <circle cx={lastX} cy={lastY} r="3.5" fill={color} stroke="#ffffff" strokeWidth="1.5" />
+          )}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Delete Confirmation Modal ─────────────────────────────────────────── */
 function DeleteModal({ container, onConfirm, onClose, loading }) {
   if (!container) return null;
 
   return (
-    <>
-      <style>{`
-        .modal-overlay {
-          position: fixed;
-          inset: 0;
-          background: rgba(0,0,0,0.5);
-          backdrop-filter: blur(4px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1000;
-          padding: 1rem;
-          animation: fadeIn 0.15s ease;
-        }
-        @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
-        .modal-box {
-          background: #fff;
-          border-radius: 16px;
-          padding: 2rem;
-          max-width: 480px;
-          width: 100%;
-          box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-          animation: slideUp 0.2s ease;
-        }
-        @keyframes slideUp { from { transform: translateY(16px); opacity:0 } to { transform: translateY(0); opacity:1 } }
-        .modal-title {
-          font-size: 1.15rem;
-          font-weight: 700;
-          color: #991b1b;
-          margin-bottom: 0.5rem;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-        .modal-body {
-          font-size: 0.875rem;
-          color: #444;
-          line-height: 1.5;
-          margin-bottom: 1.25rem;
-        }
-        .modal-warning {
-          background: #fef2f2;
-          border: 1px solid #fecaca;
-          border-radius: 10px;
-          padding: 0.85rem 1rem;
-          font-size: 0.8125rem;
-          color: #991b1b;
-          margin-bottom: 1.5rem;
-        }
-        .modal-warning strong {
-          display: block;
-          margin-bottom: 0.2rem;
-        }
-        .modal-actions {
-          display: flex;
-          gap: 0.75rem;
-          justify-content: flex-end;
-        }
-        .btn-cancel {
-          padding: 0.55rem 1.1rem;
-          border-radius: 8px;
-          border: 1px solid #ddd;
-          background: #fff;
-          color: #444;
-          font-size: 0.875rem;
-          font-weight: 500;
-          cursor: pointer;
-        }
-        .btn-cancel:hover { background: #f5f5f5; }
-        .btn-danger-confirm {
-          padding: 0.55rem 1.1rem;
-          border-radius: 8px;
-          border: none;
-          background: #dc2626;
-          color: #fff;
-          font-size: 0.875rem;
-          font-weight: 600;
-          cursor: pointer;
-        }
-        .btn-danger-confirm:hover { background: #b91c1c; }
-        .btn-danger-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
-      `}</style>
-      <div className="modal-overlay" onClick={onClose}>
-        <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-title">
-            <span>Delete Container &amp; Cleanup Data</span>
-          </div>
-          <div className="modal-body">
-            Are you sure you want to remove container <strong>{container.containerName}</strong> ({container.containerId?.slice(0, 12)})?
-          </div>
-          <div className="modal-warning">
-            <strong>PERMANENT STORAGE DATA LOSS WARNING</strong>
-            This action will permanently remove the Docker container and delete persistent volume <code>{container.volumeName || 'associated volume'}</code>. All stored user files will be unrecoverable.
-          </div>
-          <div className="modal-actions">
-            <button className="btn-cancel" onClick={onClose} disabled={loading}>
-              Cancel
-            </button>
-            <button className="btn-danger-confirm" onClick={onConfirm} disabled={loading}>
-              {loading ? "Deleting & Purging..." : "Delete & Purge Data"}
-            </button>
-          </div>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-title">
+          <span>Delete Container &amp; Cleanup Data</span>
+        </div>
+        <div className="modal-body">
+          Are you sure you want to remove container <strong>{container.containerName}</strong> ({container.containerId?.slice(0, 12)})?
+        </div>
+        <div className="modal-warning">
+          <strong>PERMANENT STORAGE DATA LOSS WARNING</strong>
+          This action will permanently remove the Docker container and delete persistent volume <code>{container.volumeName || 'associated volume'}</code>. All stored user files will be unrecoverable.
+        </div>
+        <div className="modal-actions">
+          <button className="btn-cancel" onClick={onClose} disabled={loading}>
+            Cancel
+          </button>
+          <button className="btn-danger-confirm" onClick={onConfirm} disabled={loading}>
+            {loading ? "Deleting & Purging..." : "Delete & Purge Data"}
+          </button>
         </div>
       </div>
-    </>
+    </div>
+  );
+}
+
+/* ─── Edit Resource Hard Limits Modal ───────────────────────────────────── */
+function EditLimitsModal({ container, onSave, onClose, loading }) {
+  if (!container) return null;
+
+  const [ramGB, setRamGB] = useState(container.ramLimitGB || 8);
+  const [gpuRamGB, setGpuRamGB] = useState(container.gpuRamLimitGB || 8);
+  const [storageGB, setStorageGB] = useState(container.storageLimitGB || 100);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(container.id, {
+      ramLimitGB: Number(ramGB),
+      gpuRamLimitGB: Number(gpuRamGB),
+      storageLimitGB: Number(storageGB),
+    });
+  };
+
+  const applyPreset = (ram, gpu, storage) => {
+    setRamGB(ram);
+    setGpuRamGB(gpu);
+    setStorageGB(storage);
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-title-blue">
+          <span>Edit Container Resource Limits</span>
+        </div>
+        <div className="modal-body">
+          Set custom hard limits for container <strong>{container.containerName}</strong> ({container.containerId?.slice(0, 12)}).
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="presets-row">
+            <span className="preset-label">QUICK PRESETS:</span>
+            <button
+              type="button"
+              className="btn-preset"
+              onClick={() => applyPreset(8, 8, 100)}
+            >
+              Standard (8GB / 8GB / 100GB)
+            </button>
+            <button
+              type="button"
+              className="btn-preset"
+              onClick={() => applyPreset(16, 16, 250)}
+            >
+              Pro (16GB / 16GB / 250GB)
+            </button>
+            <button
+              type="button"
+              className="btn-preset"
+              onClick={() => applyPreset(32, 32, 500)}
+            >
+              Extreme (32GB / 32GB / 500GB)
+            </button>
+          </div>
+
+          <div className="form-group">
+            <label className="input-label">
+              RAM HARD LIMIT (GB)
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="512"
+              className="form-input"
+              value={ramGB}
+              onChange={(e) => setRamGB(e.target.value)}
+              required
+            />
+            <span className="input-hint">Default is 8GB RAM per container</span>
+          </div>
+
+          <div className="form-group">
+            <label className="input-label">
+              GPU RAM HARD LIMIT (GB)
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="128"
+              className="form-input"
+              value={gpuRamGB}
+              onChange={(e) => setGpuRamGB(e.target.value)}
+              required
+            />
+            <span className="input-hint">Default is 8GB GPU RAM per container</span>
+          </div>
+
+          <div className="form-group">
+            <label className="input-label">
+              STORAGE PERSISTENT HARD LIMIT (GB)
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="10000"
+              className="form-input"
+              value={storageGB}
+              onChange={(e) => setStorageGB(e.target.value)}
+              required
+            />
+            <span className="input-hint">Default is 100GB Storage per container</span>
+          </div>
+
+          <div className="modal-actions" style={{ marginTop: "1.5rem" }}>
+            <button type="button" className="btn-cancel" onClick={onClose} disabled={loading}>
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary-confirm" disabled={loading}>
+              {loading ? "Saving Limits..." : "Save Resource Limits"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
 
@@ -179,6 +272,14 @@ export default function AdminContainersPage() {
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const [editLimitsTarget, setEditLimitsTarget] = useState(null);
+  const [editLimitsLoading, setEditLimitsLoading] = useState(false);
+
+  // Live stats state: { [containerId]: { ram, gpu, storage, timestamp } }
+  const [liveStats, setLiveStats] = useState({});
+  // History state: { [containerId]: { ram: number[], gpu: number[], storage: number[] } }
+  const [statsHistory, setStatsHistory] = useState({});
 
   const showToast = useCallback((msg, type = "success") => {
     setToast({ msg, type });
@@ -205,6 +306,40 @@ export default function AdminContainersPage() {
     }
   }, [router]);
 
+  // Poll live stats for running containers
+  const fetchLiveStats = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/containers/stats");
+      if (res.ok) {
+        const data = await res.json();
+        setLiveStats(data);
+
+        // Update sliding history (last 20 points)
+        setStatsHistory((prevHistory) => {
+          const nextHistory = { ...prevHistory };
+          Object.keys(data).forEach((cId) => {
+            const containerStat = data[cId];
+            if (!containerStat) return;
+
+            const existing = nextHistory[cId] || { ram: [], gpu: [], storage: [] };
+            const nextRam = [...existing.ram, containerStat.ram?.usagePercent || 0].slice(-20);
+            const nextGpu = [...existing.gpu, containerStat.gpu?.usagePercent || 0].slice(-20);
+            const nextStorage = [...existing.storage, containerStat.storage?.usagePercent || 0].slice(-20);
+
+            nextHistory[cId] = {
+              ram: nextRam,
+              gpu: nextGpu,
+              storage: nextStorage,
+            };
+          });
+          return nextHistory;
+        });
+      }
+    } catch {
+      // Silent error on background poll
+    }
+  }, []);
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/signin");
@@ -216,6 +351,18 @@ export default function AdminContainersPage() {
       }
     }
   }, [status, session, router, fetchContainers]);
+
+  // Set up 3-second live stats polling timer when running containers exist
+  useEffect(() => {
+    if (status !== "authenticated" || session?.user?.role !== "admin") return;
+
+    fetchLiveStats();
+    const interval = setInterval(() => {
+      fetchLiveStats();
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [status, session, fetchLiveStats]);
 
   const handleToggleState = async (container) => {
     setActionLoadingId(container.id);
@@ -234,6 +381,7 @@ export default function AdminContainersPage() {
         setContainers((prev) =>
           prev.map((c) => (c.id === container.id ? { ...c, status: data.status } : c))
         );
+        fetchLiveStats();
       } else {
         setError(data.error || "Failed to toggle container state");
       }
@@ -269,6 +417,44 @@ export default function AdminContainersPage() {
     }
   };
 
+  const handleSaveLimits = async (containerId, limits) => {
+    setEditLimitsLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch(`/api/admin/containers/${containerId}/limits`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(limits),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        showToast(`Limits updated: RAM ${data.ramLimitGB}GB, GPU RAM ${data.gpuRamLimitGB}GB, Storage ${data.storageLimitGB}GB`);
+        setContainers((prev) =>
+          prev.map((c) =>
+            c.id === containerId
+              ? {
+                  ...c,
+                  ramLimitGB: data.ramLimitGB,
+                  gpuRamLimitGB: data.gpuRamLimitGB,
+                  storageLimitGB: data.storageLimitGB,
+                }
+              : c
+          )
+        );
+        setEditLimitsTarget(null);
+        fetchLiveStats();
+      } else {
+        setError(data.error || "Failed to update container resource limits");
+      }
+    } catch {
+      setError("Error calling update limits API");
+    } finally {
+      setEditLimitsLoading(false);
+    }
+  };
+
   // Filter & Search Logic
   const runningCount = containers.filter((c) => c.status === "running").length;
   const stoppedCount = containers.filter((c) => c.status !== "running").length;
@@ -296,7 +482,7 @@ export default function AdminContainersPage() {
         <div className="page">
           <div className="container" style={{ textAlign: "center", paddingTop: "5rem" }}>
             <p className="wordmark">Access</p>
-            <p className="sub" style={{ marginTop: "1rem" }}>Loading Containers & Storage dashboard…</p>
+            <p className="sub" style={{ marginTop: "1rem" }}>Loading Containers &amp; Storage dashboard…</p>
           </div>
         </div>
       </>
@@ -322,26 +508,35 @@ export default function AdminContainersPage() {
         />
       )}
 
+      {editLimitsTarget && (
+        <EditLimitsModal
+          container={editLimitsTarget}
+          onSave={handleSaveLimits}
+          onClose={() => setEditLimitsTarget(null)}
+          loading={editLimitsLoading}
+        />
+      )}
+
       <div className="dash-layout">
         <Sidebar session={session} />
         <main className="main-content">
           {/* Header */}
           <header className="content-header">
             <div>
-              <h1 className="header-title">Containers & Storage</h1>
+              <h1 className="header-title">Containers &amp; Live Usage Graphs</h1>
               <p className="header-subtitle">
-                Manage host Docker containers, allocated SSH ports, and persistent storage volumes
+                Monitor live RAM, GPU RAM, and Storage graphs, edit container hard limits (100GB Storage / 8GB RAM / 8GB GPU RAM standard), and manage persistent volumes.
               </p>
             </div>
             <div className="header-actions">
               <button
                 className="btn-refresh"
-                onClick={fetchContainers}
+                onClick={() => { fetchContainers(); fetchLiveStats(); }}
                 type="button"
                 id="refresh-btn"
                 disabled={loading}
               >
-                {loading ? "Refreshing..." : "⟳ Refresh Status"}
+                {loading ? "Refreshing..." : "⟳ Refresh Live Status"}
               </button>
             </div>
           </header>
@@ -361,7 +556,7 @@ export default function AdminContainersPage() {
               <span className="stat-val text-gray">{stoppedCount}</span>
             </div>
             <div className="stat-card">
-              <span className="stat-label">Storage Volumes</span>
+              <span className="stat-label">Storage Volumes (100GB Std)</span>
               <span className="stat-val text-purple">
                 {containers.filter((c) => c.volumeName).length}
               </span>
@@ -432,14 +627,39 @@ export default function AdminContainersPage() {
                 const isRunning = item.status === "running";
                 const isActionLoading = actionLoadingId === item.id;
 
+                const cId = item.containerId || item.id;
+                const stat = liveStats[cId] || liveStats[cId?.slice(0, 12)] || null;
+                const history = statsHistory[cId] || statsHistory[cId?.slice(0, 12)] || { ram: [], gpu: [], storage: [] };
+
+                const ramLimitGB = item.ramLimitGB || 8;
+                const gpuRamLimitGB = item.gpuRamLimitGB || 8;
+                const storageLimitGB = item.storageLimitGB || 100;
+
+                const ramUsedGB = stat?.ram?.usedGB !== undefined ? stat.ram.usedGB : 0;
+                const ramPercent = stat?.ram?.usagePercent !== undefined ? stat.ram.usagePercent : 0;
+
+                const gpuUsedGB = stat?.gpu?.usedGB !== undefined ? stat.gpu.usedGB : 0;
+                const gpuPercent = stat?.gpu?.usagePercent !== undefined ? stat.gpu.usagePercent : 0;
+                const gpuPresent = stat?.gpu?.gpuPresent ?? false;
+
+                const storageUsedGB = stat?.storage?.usedGB !== undefined ? stat.storage.usedGB : 0;
+                const storagePercent = stat?.storage?.usagePercent !== undefined ? stat.storage.usagePercent : 0;
+
                 return (
                   <div key={item.id} className="container-card">
+                    {/* Top Row */}
                     <div className="card-top">
                       <div className="card-title-group">
                         <span className="card-title">{item.containerName}</span>
                         <StatusBadge status={item.status} />
                       </div>
                       <div className="card-actions">
+                        <button
+                          className="btn-action btn-edit-limits"
+                          onClick={() => setEditLimitsTarget(item)}
+                        >
+                          ✎ Change Limits
+                        </button>
                         <button
                           className={`btn-action ${isRunning ? "btn-stop" : "btn-start"}`}
                           onClick={() => handleToggleState(item)}
@@ -461,6 +681,7 @@ export default function AdminContainersPage() {
                       </div>
                     </div>
 
+                    {/* Metadata Grid */}
                     <div className="meta-grid">
                       <div className="meta-item">
                         <span className="meta-label">ASSIGNED USER</span>
@@ -469,7 +690,7 @@ export default function AdminContainersPage() {
                         </span>
                       </div>
                       <div className="meta-item">
-                        <span className="meta-label">SSH HOST & PORT</span>
+                        <span className="meta-label">SSH HOST &amp; PORT</span>
                         <span className="meta-val">
                           <code>{item.sshHost}:{item.sshPort || "N/A"}</code>
                         </span>
@@ -496,6 +717,70 @@ export default function AdminContainersPage() {
                         <span className="meta-label">CREATED AT</span>
                         <span className="meta-val">{formatDate(item.createdAt)}</span>
                       </div>
+                    </div>
+
+                    {/* Configured Limits Summary Pills */}
+                    <div className="limits-pills-row">
+                      <div className="limit-pill">
+                        <span className="pill-dot blue-dot" />
+                        <span>RAM Limit: <strong>{ramLimitGB} GB</strong></span>
+                      </div>
+                      <div className="limit-pill">
+                        <span className="pill-dot purple-dot" />
+                        <span>GPU RAM Limit: <strong>{gpuRamLimitGB} GB</strong></span>
+                      </div>
+                      <div className="limit-pill">
+                        <span className="pill-dot emerald-dot" />
+                        <span>Storage Limit: <strong>{storageLimitGB} GB</strong></span>
+                      </div>
+                    </div>
+
+                    {/* Live Usage Graphs Section */}
+                    <div className="graphs-section">
+                      <div className="graphs-section-title">
+                        <span>LIVE USAGE GRAPHS</span>
+                        {isRunning ? (
+                          <span className="live-tag">
+                            <span className="live-dot" /> REAL-TIME POLL (3s)
+                          </span>
+                        ) : (
+                          <span className="stopped-tag">PAUSED (CONTAINER STOPPED)</span>
+                        )}
+                      </div>
+
+                      {isRunning ? (
+                        <div className="graphs-grid">
+                          <ResourceGraph
+                            title="RAM Usage"
+                            usedGB={ramUsedGB}
+                            limitGB={ramLimitGB}
+                            percent={ramPercent}
+                            history={history.ram}
+                            color="#2563eb"
+                          />
+                          <ResourceGraph
+                            title="GPU RAM Usage"
+                            usedGB={gpuUsedGB}
+                            limitGB={gpuRamLimitGB}
+                            percent={gpuPercent}
+                            history={history.gpu}
+                            color="#8b5cf6"
+                            subtitle={!gpuPresent ? "(No Host GPU)" : "(NVIDIA GPU)"}
+                          />
+                          <ResourceGraph
+                            title="Storage Usage"
+                            usedGB={storageUsedGB}
+                            limitGB={storageLimitGB}
+                            percent={storagePercent}
+                            history={history.storage}
+                            color="#10b981"
+                          />
+                        </div>
+                      ) : (
+                        <div className="graphs-offline-box">
+                          Container is currently stopped. Start container to view real-time live usage graphs for RAM ({ramLimitGB}GB limit), GPU RAM ({gpuRamLimitGB}GB limit), and Storage ({storageLimitGB}GB limit).
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -540,7 +825,7 @@ const pageStyles = `
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 2rem;
+    margin-bottom: 1.75rem;
     gap: 1rem;
     flex-wrap: wrap;
   }
@@ -556,6 +841,8 @@ const pageStyles = `
     font-size: 0.875rem;
     color: #555555;
     margin-top: 0.25rem;
+    max-width: 800px;
+    line-height: 1.45;
   }
 
   .header-actions {
@@ -583,7 +870,7 @@ const pageStyles = `
   }
 
   .stat-label {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 600;
     color: #777;
     text-transform: uppercase;
@@ -591,7 +878,7 @@ const pageStyles = `
   }
 
   .stat-val {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: #111;
   }
@@ -687,7 +974,7 @@ const pageStyles = `
     border-radius: 8px;
     border: 1px solid #ddd;
     font-size: 0.8125rem;
-    min-width: 220px;
+    min-width: 240px;
     outline: none;
   }
 
@@ -712,7 +999,7 @@ const pageStyles = `
   .container-list {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.25rem;
   }
 
   .container-card {
@@ -744,7 +1031,7 @@ const pageStyles = `
   }
 
   .card-title {
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: #111;
   }
@@ -752,6 +1039,7 @@ const pageStyles = `
   .card-actions {
     display: flex;
     gap: 0.5rem;
+    flex-wrap: wrap;
   }
 
   .btn-action {
@@ -763,6 +1051,13 @@ const pageStyles = `
     border: 1px solid transparent;
     transition: all 0.15s;
   }
+
+  .btn-edit-limits {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+  }
+  .btn-edit-limits:hover { background: #dbeafe; }
 
   .btn-start {
     background: #f0fdf4;
@@ -795,6 +1090,7 @@ const pageStyles = `
     border-radius: 10px;
     padding: 0.85rem 1rem;
     border: 1px solid #f0f0f0;
+    margin-bottom: 1rem;
   }
 
   .meta-item {
@@ -823,6 +1119,313 @@ const pageStyles = `
     border-radius: 4px;
     font-size: 0.8125rem;
   }
+
+  /* Resource Limits Pills */
+  .limits-pills-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+
+  .limit-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.78125rem;
+    color: #334155;
+  }
+
+  .pill-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .blue-dot { background: #2563eb; }
+  .purple-dot { background: #8b5cf6; }
+  .emerald-dot { background: #10b981; }
+
+  /* Graphs Section */
+  .graphs-section {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem 1.15rem;
+  }
+
+  .graphs-section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #475569;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .live-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #166534;
+    background: #dcfce7;
+    padding: 0.15rem 0.5rem;
+    border-radius: 12px;
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 6px #22c55e;
+  }
+
+  .stopped-tag {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 0.15rem 0.5rem;
+    border-radius: 12px;
+  }
+
+  .graphs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+
+  .graph-card {
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 10px;
+    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .graph-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .graph-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .graph-sub {
+    font-size: 0.6875rem;
+    color: #64748b;
+    margin-left: 0.25rem;
+  }
+
+  .graph-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+
+  .graph-svg-container {
+    width: 100%;
+    height: 65px;
+  }
+
+  .graph-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .graphs-offline-box {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 0.8125rem;
+    color: #64748b;
+    text-align: center;
+  }
+
+  /* Modals */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+    animation: fadeIn 0.15s ease;
+  }
+  @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+  .modal-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: slideUp 0.2s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(16px); opacity:0 } to { transform: translateY(0); opacity:1 } }
+
+  .modal-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #991b1b;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-title-blue {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1d4ed8;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-body {
+    font-size: 0.875rem;
+    color: #444;
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+  }
+
+  .modal-warning {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    font-size: 0.8125rem;
+    color: #991b1b;
+    margin-bottom: 1.5rem;
+  }
+  .modal-warning strong {
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+
+  .presets-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+    background: #f1f5f9;
+    padding: 0.6rem;
+    border-radius: 8px;
+  }
+
+  .preset-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: #475569;
+    width: 100%;
+    margin-bottom: 0.15rem;
+  }
+
+  .btn-preset {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.25rem 0.55rem;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    cursor: pointer;
+  }
+  .btn-preset:hover { background: #e2e8f0; }
+
+  .form-group {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .input-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #334155;
+    letter-spacing: 0.02em;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.875rem;
+    outline: none;
+  }
+  .form-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+  .input-hint {
+    font-size: 0.72rem;
+    color: #64748b;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+  }
+
+  .btn-cancel {
+    padding: 0.55rem 1.1rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #fff;
+    color: #444;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn-cancel:hover { background: #f5f5f5; }
+
+  .btn-danger-confirm {
+    padding: 0.55rem 1.1rem;
+    border-radius: 8px;
+    border: none;
+    background: #dc2626;
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-danger-confirm:hover { background: #b91c1c; }
+  .btn-danger-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-primary-confirm {
+    padding: 0.55rem 1.1rem;
+    border-radius: 8px;
+    border: none;
+    background: #2563eb;
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-primary-confirm:hover { background: #1d4ed8; }
+  .btn-primary-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .empty-state {
     text-align: center;

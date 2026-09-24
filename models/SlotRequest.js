@@ -52,6 +52,9 @@ const SlotRequestSchema = new mongoose.Schema(
       sshUser: { type: String, default: null },
       sshPassword: { type: String, default: null },
       volumeName: { type: String, default: null },
+      ramLimitGB: { type: Number, default: 8 },
+      gpuRamLimitGB: { type: Number, default: 8 },
+      storageLimitGB: { type: Number, default: 100 },
     },
     warningSent: {
       type: Boolean,

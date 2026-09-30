@@ -90,10 +90,38 @@ export default function UserDashboardClient({ session }) {
     }
   };
 
-  const handleCopy = (text, key) => {
-    navigator.clipboard.writeText(text);
-    setCopiedKey(key);
-    setTimeout(() => setCopiedKey(null), 2000);
+  const handleCopy = async (text, key) => {
+    try {
+      let copied = false;
+      if (navigator.clipboard?.writeText && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(text);
+          copied = true;
+        } catch (error) {
+          copied = false;
+        }
+      }
+      if (!copied) {
+        const input = document.createElement("textarea");
+        input.value = text;
+        input.setAttribute("readonly", "");
+        input.style.position = "fixed";
+        input.style.opacity = "0";
+        document.body.appendChild(input);
+        input.select();
+        try {
+          copied = document.execCommand("copy");
+        } finally {
+          input.remove();
+        }
+        if (!copied) throw new Error("Clipboard copy was not successful");
+      }
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 2000);
+    } catch (error) {
+      setToast("Copy failed. Please select the text and copy it manually.");
+      setTimeout(() => setToast(null), 4000);
+    }
   };
 
   const handleConfirmCancel = async () => {
@@ -291,6 +319,7 @@ export default function UserDashboardClient({ session }) {
                         )}
                       </div>
                     </div>
+                    {showPassword && <span className="password-hint">0 = zero; O = capital letter O</span>}
                   </div>
                 </div>
 
@@ -1078,6 +1107,13 @@ const css = `
     display: flex;
     align-items: center;
     gap: 0.5rem;
+  }
+
+  .password-hint {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--text-muted);
+    font-size: 0.6875rem;
   }
 
   .btn-pwd-toggle {

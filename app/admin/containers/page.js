@@ -230,7 +230,7 @@ function EditLimitsModal({ container, onSave, onClose, loading }) {
 
           <div className="form-group">
             <label className="input-label">
-              STORAGE PERSISTENT HARD LIMIT (GB)
+              PERSISTENT STORAGE TARGET (GB)
             </label>
             <input
               type="number"
@@ -241,7 +241,7 @@ function EditLimitsModal({ container, onSave, onClose, loading }) {
               onChange={(e) => setStorageGB(e.target.value)}
               required
             />
-            <span className="input-hint">Default is 100GB Storage per container</span>
+            <span className="input-hint">Usage is measured on the persistent volume; this target is not enforced as a volume quota.</span>
           </div>
 
           <div className="modal-actions" style={{ marginTop: "1.5rem" }}>
@@ -525,7 +525,7 @@ export default function AdminContainersPage() {
             <div>
               <h1 className="header-title">Containers &amp; Live Usage Graphs</h1>
               <p className="header-subtitle">
-                Monitor live RAM, GPU RAM, and Storage graphs, edit container hard limits (100GB Storage / 8GB RAM / 8GB GPU RAM standard), and manage persistent volumes.
+                Monitor live RAM, GPU RAM, and persistent-volume usage, configure resource targets, and manage container volumes.
               </p>
             </div>
             <div className="header-actions">
@@ -774,6 +774,7 @@ export default function AdminContainersPage() {
                             percent={storagePercent}
                             history={history.storage}
                             color="#10b981"
+                            subtitle="Persistent volume; target is not enforced"
                           />
                         </div>
                       ) : (

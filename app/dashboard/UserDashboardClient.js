@@ -128,7 +128,7 @@ export default function UserDashboardClient({ session }) {
     if (!cancelTarget) return;
     setCancelLoading(true);
     try {
-      const res = await fetch(`/api/requests/${cancelTarget._id}`, {
+      const res = await fetch(`/api/requests/${cancelTarget._id}/cancel`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "cancel" }),

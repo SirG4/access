@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -8,8 +9,37 @@ import { VidyalankarLogo } from "@/app/components/AuthHero";
 export default function Sidebar({ session }) {
   const pathname = usePathname();
   const user = session?.user || {};
+  const [isOpen, setIsOpen] = useState(false);
 
   const isActive = (path) => pathname === path;
+
+  // Auto-close popout drawer on route change
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  // Close on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Lock body scroll when mobile popout is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   return (
     <>
@@ -31,6 +61,8 @@ export default function Sidebar({ session }) {
         }
 
         body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+
+        /* Desktop Layout */
         .dash-layout {
           display: flex;
           min-height: 100vh;
@@ -51,6 +83,7 @@ export default function Sidebar({ session }) {
           top: 0;
           height: 100vh;
           overflow-y: auto;
+          z-index: 10;
         }
 
         .brand-header {
@@ -83,7 +116,7 @@ export default function Sidebar({ session }) {
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.1em;
-          color: #334155;
+          color: #475569;
           margin: 1.25rem 0.5rem 0.5rem;
         }
 
@@ -191,9 +224,244 @@ export default function Sidebar({ session }) {
           color: #f87171;
           border-color: rgba(220, 38, 38, 0.3);
         }
+
+        /* Mobile-only elements (hidden by default on desktop) */
+        .mobile-topbar {
+          display: none;
+        }
+        .sidebar-backdrop {
+          display: none;
+        }
+        .sidebar-mobile-close-row {
+          display: none;
+        }
+
+        /* ── RESPONSIVE MOBILE NAVIGATION (Phone Screens) ── */
+        @media (max-width: 768px) {
+          .dash-layout {
+            flex-direction: column;
+            min-height: 100vh;
+            width: 100%;
+          }
+
+          /* Mobile Sticky Top Header Bar */
+          .mobile-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+            padding: 0 1rem;
+            background: var(--navy);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 990;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+            box-sizing: border-box;
+          }
+
+          .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+          }
+
+          .mobile-logo-img {
+            height: 32px;
+            width: auto;
+            object-fit: contain;
+          }
+
+          .mobile-brand-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: -0.01em;
+          }
+
+          /* Hamburger Icon Button */
+          .hamburger-btn {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 38px;
+            height: 38px;
+            padding: 10px 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+          }
+
+          .hamburger-btn:hover,
+          .hamburger-btn:focus-visible {
+            background: rgba(255, 255, 255, 0.16);
+            outline: none;
+          }
+
+          .hamburger-line {
+            width: 100%;
+            height: 2px;
+            background-color: #ffffff;
+            border-radius: 2px;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-origin: center;
+          }
+
+          .hamburger-btn.is-active .hamburger-line:nth-child(1) {
+            transform: translateY(6px) rotate(45deg);
+          }
+
+          .hamburger-btn.is-active .hamburger-line:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+          }
+
+          .hamburger-btn.is-active .hamburger-line:nth-child(3) {
+            transform: translateY(-6px) rotate(-45deg);
+          }
+
+          /* Backdrop Dim Overlay */
+          .sidebar-backdrop {
+            display: block;
+            position: fixed;
+            inset: 0;
+            background: rgba(7, 23, 47, 0.65);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            z-index: 1040;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+          }
+
+          .sidebar-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+          }
+
+          /* Pop-Out Right Drawer Navigation */
+          .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: auto;
+            width: 290px;
+            max-width: 86vw;
+            height: 100vh;
+            min-height: 100vh;
+            z-index: 1050;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+            box-shadow: none;
+            visibility: hidden;
+            pointer-events: none;
+            border-right: none;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            box-sizing: border-box;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+          }
+
+          .sidebar.mobile-open {
+            transform: translateX(0);
+            box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
+            visibility: visible;
+            pointer-events: auto;
+          }
+
+          /* Pop-Out Header with Close Button */
+          .sidebar-mobile-close-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          }
+
+          .mobile-drawer-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #94a3b8;
+          }
+
+          .sidebar-close-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.15s ease;
+          }
+
+          .sidebar-close-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+          }
+        }
       `}</style>
 
-      <aside className="sidebar">
+      {/* Mobile Top Header Bar with Hamburger Button */}
+      <header className="mobile-topbar">
+        <div className="mobile-brand">
+          <img
+            src="/vidlogo.png"
+            alt="Vidyalankar Logo"
+            className="mobile-logo-img"
+          />
+          <span className="mobile-brand-title">Supercomputer Portal</span>
+        </div>
+        <button
+          className={`hamburger-btn ${isOpen ? "is-active" : ""}`}
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={isOpen}
+          type="button"
+        >
+          <span className="hamburger-line" />
+          <span className="hamburger-line" />
+          <span className="hamburger-line" />
+        </button>
+      </header>
+
+      {/* Pop-Out Backdrop Overlay */}
+      <div
+        className={`sidebar-backdrop ${isOpen ? "open" : ""}`}
+        onClick={() => setIsOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* Navigation Pop-Out Drawer (from the right on mobile) */}
+      <aside className={`sidebar ${isOpen ? "mobile-open" : ""}`}>
+        <div className="sidebar-mobile-close-row">
+          <span className="mobile-drawer-label">Navigation</span>
+          <button
+            className="sidebar-close-btn"
+            onClick={() => setIsOpen(false)}
+            aria-label="Close navigation"
+            type="button"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
         <div className="brand-header">
           <VidyalankarLogo />
           <span className="brand-sub">Supercomputer Portal</span>
@@ -203,6 +471,7 @@ export default function Sidebar({ session }) {
           <Link
             href="/dashboard"
             className={`nav-link ${isActive("/dashboard") ? "active" : ""}`}
+            onClick={() => setIsOpen(false)}
           >
             <span className="nav-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -217,6 +486,7 @@ export default function Sidebar({ session }) {
           <Link
             href="/dashboard/calendar"
             className={`nav-link ${isActive("/dashboard/calendar") ? "active" : ""}`}
+            onClick={() => setIsOpen(false)}
           >
             <span className="nav-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -234,6 +504,7 @@ export default function Sidebar({ session }) {
               <Link
                 href="/admin/requests"
                 className={`nav-link ${isActive("/admin/requests") ? "active" : ""}`}
+                onClick={() => setIsOpen(false)}
               >
                 <span className="nav-icon">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -246,6 +517,7 @@ export default function Sidebar({ session }) {
               <Link
                 href="/admin/containers"
                 className={`nav-link ${isActive("/admin/containers") ? "active" : ""}`}
+                onClick={() => setIsOpen(false)}
               >
                 <span className="nav-icon">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -260,6 +532,7 @@ export default function Sidebar({ session }) {
               <Link
                 href="/admin/audit-logs"
                 className={`nav-link ${isActive("/admin/audit-logs") ? "active" : ""}`}
+                onClick={() => setIsOpen(false)}
               >
                 <span className="nav-icon">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -275,6 +548,7 @@ export default function Sidebar({ session }) {
               <Link
                 href="/admin/users"
                 className={`nav-link ${isActive("/admin/users") ? "active" : ""}`}
+                onClick={() => setIsOpen(false)}
               >
                 <span className="nav-icon">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

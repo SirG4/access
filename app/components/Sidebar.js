@@ -86,6 +86,13 @@ export default function Sidebar({ session }) {
           z-index: 10;
         }
 
+        .sidebar-scrollable-area {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          overflow-y: auto;
+        }
+
         .brand-header {
           display: flex;
           flex-direction: column;
@@ -163,6 +170,7 @@ export default function Sidebar({ session }) {
           display: flex;
           flex-direction: column;
           gap: 1rem;
+          flex-shrink: 0;
         }
 
         .user-profile {
@@ -207,22 +215,26 @@ export default function Sidebar({ session }) {
 
         .btn-signout {
           width: 100%;
-          padding: 0.5rem;
-          border: 1px solid rgba(255,255,255,0.1);
+          padding: 0.6rem 0.85rem;
+          border: 1px solid rgba(239, 68, 68, 0.35);
           border-radius: 8px;
-          background: transparent;
-          color: #94a3b8;
+          background: rgba(239, 68, 68, 0.1);
+          color: #fca5a5;
           font-size: 0.8125rem;
-          font-weight: 500;
+          font-weight: 600;
           cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
           transition: all 0.15s ease;
           font-family: inherit;
         }
 
         .btn-signout:hover {
-          background: rgba(220, 38, 38, 0.12);
-          color: #f87171;
-          border-color: rgba(220, 38, 38, 0.3);
+          background: #dc2626;
+          color: #ffffff;
+          border-color: #dc2626;
         }
 
         /* Mobile-only elements (hidden by default on desktop) */
@@ -249,8 +261,8 @@ export default function Sidebar({ session }) {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 56px;
-            padding: 0 1rem;
+            height: 58px;
+            padding: 0 0.85rem;
             background: var(--navy);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             position: sticky;
@@ -266,20 +278,56 @@ export default function Sidebar({ session }) {
           .mobile-brand {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
+            min-width: 0;
           }
 
           .mobile-logo-img {
-            height: 32px;
+            height: 30px;
             width: auto;
             object-fit: contain;
+            flex-shrink: 0;
           }
 
           .mobile-brand-title {
-            font-size: 0.875rem;
+            font-size: 0.8125rem;
             font-weight: 600;
             color: #ffffff;
             letter-spacing: -0.01em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .mobile-topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+          }
+
+          /* Sign Out button directly visible on mobile topbar */
+          .mobile-header-signout {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.38rem 0.65rem;
+            background: rgba(239, 68, 68, 0.14);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            border-radius: 6px;
+            color: #fca5a5;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+          }
+
+          .mobile-header-signout:hover,
+          .mobile-header-signout:active {
+            background: #dc2626;
+            color: #ffffff;
+            border-color: #dc2626;
           }
 
           /* Hamburger Icon Button */
@@ -287,12 +335,12 @@ export default function Sidebar({ session }) {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            width: 38px;
-            height: 38px;
-            padding: 10px 8px;
+            width: 36px;
+            height: 36px;
+            padding: 9px 7px;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s ease;
             box-sizing: border-box;
@@ -355,7 +403,8 @@ export default function Sidebar({ session }) {
             width: 290px;
             max-width: 86vw;
             height: 100vh;
-            min-height: 100vh;
+            height: 100dvh;
+            max-height: 100dvh;
             z-index: 1050;
             transform: translateX(100%);
             transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
@@ -365,8 +414,10 @@ export default function Sidebar({ session }) {
             border-right: none;
             border-left: 1px solid rgba(255, 255, 255, 0.1);
             box-sizing: border-box;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 1.25rem 1rem max(1rem, env(safe-area-inset-bottom));
           }
 
           .sidebar.mobile-open {
@@ -384,6 +435,7 @@ export default function Sidebar({ session }) {
             padding-bottom: 0.75rem;
             margin-bottom: 0.75rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            flex-shrink: 0;
           }
 
           .mobile-drawer-label {
@@ -412,10 +464,30 @@ export default function Sidebar({ session }) {
             background: rgba(255, 255, 255, 0.16);
             color: #ffffff;
           }
+
+          .sidebar-scrollable-area {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-right: 0.25rem;
+            margin-bottom: 0.5rem;
+          }
+
+          /* Sticky pinned footer inside drawer */
+          .sidebar-footer {
+            flex-shrink: 0;
+            position: sticky;
+            bottom: 0;
+            background: var(--navy);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            padding-top: 0.85rem;
+            padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+            box-shadow: 0 -8px 16px rgba(7, 23, 47, 0.95);
+          }
         }
       `}</style>
 
-      {/* Mobile Top Header Bar with Hamburger Button */}
+      {/* Mobile Top Header Bar with Hamburger Button and Visible Sign Out */}
       <header className="mobile-topbar">
         <div className="mobile-brand">
           <img
@@ -425,17 +497,35 @@ export default function Sidebar({ session }) {
           />
           <span className="mobile-brand-title">Supercomputer Portal</span>
         </div>
-        <button
-          className={`hamburger-btn ${isOpen ? "is-active" : ""}`}
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
-          aria-expanded={isOpen}
-          type="button"
-        >
-          <span className="hamburger-line" />
-          <span className="hamburger-line" />
-          <span className="hamburger-line" />
-        </button>
+
+        <div className="mobile-topbar-actions">
+          <button
+            id="mobile-header-signout-btn"
+            className="mobile-header-signout"
+            onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+            title="Sign Out"
+            type="button"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span>Sign Out</span>
+          </button>
+
+          <button
+            className={`hamburger-btn ${isOpen ? "is-active" : ""}`}
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={isOpen}
+            type="button"
+          >
+            <span className="hamburger-line" />
+            <span className="hamburger-line" />
+            <span className="hamburger-line" />
+          </button>
+        </div>
       </header>
 
       {/* Pop-Out Backdrop Overlay */}
@@ -462,108 +552,112 @@ export default function Sidebar({ session }) {
           </button>
         </div>
 
-        <div className="brand-header">
-          <VidyalankarLogo />
-          <span className="brand-sub">Supercomputer Portal</span>
+        {/* Scrollable Nav Area */}
+        <div className="sidebar-scrollable-area">
+          <div className="brand-header">
+            <VidyalankarLogo />
+            <span className="brand-sub">Supercomputer Portal</span>
+          </div>
+
+          <nav className="nav-menu">
+            <Link
+              href="/dashboard"
+              className={`nav-link ${isActive("/dashboard") ? "active" : ""}`}
+              onClick={() => setIsOpen(false)}
+            >
+              <span className="nav-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="14" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" />
+                </svg>
+              </span>
+              Active Access
+            </Link>
+            <Link
+              href="/dashboard/calendar"
+              className={`nav-link ${isActive("/dashboard/calendar") ? "active" : ""}`}
+              onClick={() => setIsOpen(false)}
+            >
+              <span className="nav-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </span>
+              Calendar &amp; Booking
+            </Link>
+            {user.role === "admin" && (
+              <>
+                <div className="nav-group-title">Admin Management</div>
+                <Link
+                  href="/admin/requests"
+                  className={`nav-link ${isActive("/admin/requests") ? "active" : ""}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <span className="nav-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 11l3 3L22 4" />
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                    </svg>
+                  </span>
+                  Review Requests
+                </Link>
+                <Link
+                  href="/admin/containers"
+                  className={`nav-link ${isActive("/admin/containers") ? "active" : ""}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <span className="nav-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+                      <line x1="12" y1="12" x2="12" y2="16" />
+                      <line x1="10" y1="14" x2="14" y2="14" />
+                    </svg>
+                  </span>
+                  Containers &amp; Storage
+                </Link>
+                <Link
+                  href="/admin/audit-logs"
+                  className={`nav-link ${isActive("/admin/audit-logs") ? "active" : ""}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <span className="nav-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                      <polyline points="10 9 9 9 8 9" />
+                    </svg>
+                  </span>
+                  Audit Logs
+                </Link>
+                <Link
+                  href="/admin/users"
+                  className={`nav-link ${isActive("/admin/users") ? "active" : ""}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <span className="nav-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                  </span>
+                  User Management
+                </Link>
+              </>
+            )}
+          </nav>
         </div>
 
-        <nav className="nav-menu">
-          <Link
-            href="/dashboard"
-            className={`nav-link ${isActive("/dashboard") ? "active" : ""}`}
-            onClick={() => setIsOpen(false)}
-          >
-            <span className="nav-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7" rx="1" />
-                <rect x="14" y="3" width="7" height="7" rx="1" />
-                <rect x="14" y="14" width="7" height="7" rx="1" />
-                <rect x="3" y="14" width="7" height="7" rx="1" />
-              </svg>
-            </span>
-            Active Access
-          </Link>
-          <Link
-            href="/dashboard/calendar"
-            className={`nav-link ${isActive("/dashboard/calendar") ? "active" : ""}`}
-            onClick={() => setIsOpen(false)}
-          >
-            <span className="nav-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-            </span>
-            Calendar &amp; Booking
-          </Link>
-          {user.role === "admin" && (
-            <>
-              <div className="nav-group-title">Admin Management</div>
-              <Link
-                href="/admin/requests"
-                className={`nav-link ${isActive("/admin/requests") ? "active" : ""}`}
-                onClick={() => setIsOpen(false)}
-              >
-                <span className="nav-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 11l3 3L22 4" />
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                  </svg>
-                </span>
-                Review Requests
-              </Link>
-              <Link
-                href="/admin/containers"
-                className={`nav-link ${isActive("/admin/containers") ? "active" : ""}`}
-                onClick={() => setIsOpen(false)}
-              >
-                <span className="nav-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
-                    <line x1="12" y1="12" x2="12" y2="16" />
-                    <line x1="10" y1="14" x2="14" y2="14" />
-                  </svg>
-                </span>
-                Containers &amp; Storage
-              </Link>
-              <Link
-                href="/admin/audit-logs"
-                className={`nav-link ${isActive("/admin/audit-logs") ? "active" : ""}`}
-                onClick={() => setIsOpen(false)}
-              >
-                <span className="nav-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                    <polyline points="10 9 9 9 8 9" />
-                  </svg>
-                </span>
-                Audit Logs
-              </Link>
-              <Link
-                href="/admin/users"
-                className={`nav-link ${isActive("/admin/users") ? "active" : ""}`}
-                onClick={() => setIsOpen(false)}
-              >
-                <span className="nav-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                </span>
-                User Management
-              </Link>
-            </>
-          )}
-        </nav>
-
+        {/* Pinned Sticky Footer inside Popout Drawer */}
         <div className="sidebar-footer">
           <div className="user-profile">
             <div className="user-avatar">
@@ -580,8 +674,14 @@ export default function Sidebar({ session }) {
             id="dash-signout-btn"
             className="btn-signout"
             onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+            type="button"
           >
-            Sign Out
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span>Sign Out</span>
           </button>
         </div>
       </aside>

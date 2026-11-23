@@ -4,15 +4,28 @@ Follow these steps to set up the project on any machine after cloning the reposi
 
 ## Prerequisites & Hardware
 
-Make sure you have the following installed on your machine:
-- [Node.js](https://nodejs.org/) (v18 or higher recommended)
-- [Docker](https://www.docker.com/products/docker-desktop) and Docker Compose
-- **NVIDIA Host Driver** (v535+) & **NVIDIA Container Toolkit** (for host PC with NVIDIA RTX 4090 GPU)
+This guide includes a server-specific production configuration for:
+
+- **CPU:** Intel Xeon Gold 6240R @ 2.40 GHz
+- **Memory:** 187 GiB RAM
+- **GPU:** NVIDIA RTX 4500 Ada Generation (24 GiB VRAM)
+- **Storage:** 12.3 TiB RAID-backed `/home` filesystem
+- **Dedicated Docker allocation:** 8 TiB preferred
+
+Make sure you have the following installed on the Linux server:
+- [Node.js](https://nodejs.org/) (v20 or later required; Node 16 is incompatible with current MongoDB and Next.js dependencies)
+- Docker Engine and Docker Compose v2 (Docker Desktop is not required)
+- A supported NVIDIA production/Open Kernel host driver for the RTX 4500 Ada
+- NVIDIA Container Toolkit
 - npm (comes with Node.js)
 
-## GPU & Zero-Setup Features (NVIDIA RTX 4090)
+Use a supported RHEL, Rocky Linux, AlmaLinux, Fedora, or compatible DNF-based distribution. The provisioned containers can remain Ubuntu-based even when the Docker host uses DNF.
 
-The slot container image is pre-configured for **NVIDIA GeForce RTX 4090** (24 GB VRAM) with **zero setup required by end users**.
+## GPU & Container Features
+
+The slot container image is GPU-capable and pre-configured for NVIDIA RTX Ada GPUs with **24 GiB VRAM**. It targets CUDA 12.4; verify compatibility with the host driver and update the CUDA/PyTorch image if a different driver or ML stack is required.
+
+For this server, the RTX 4500 Ada must be passed through by Docker using NVIDIA Container Toolkit. A slot is configured with access to all available GPUs unless the container provisioning code is changed to limit GPU allocation.
 
 ### Pre-Installed Packages & AI Suite:
 - **CUDA & GPU Runtime**: CUDA 12.4.1 runtime, `nvidia-smi`, `nvtop` (interactive GPU monitor), `htop`
@@ -27,20 +40,213 @@ When users SSH into their provisioned slot container, they can immediately run:
 # Verify GPU Detection & PyTorch CUDA Access
 python3 -c "import torch; print('CUDA Available:', torch.cuda.is_available()); print('Device Name:', torch.cuda.get_device_name(0))"
 
-# Check GPU Utilization & VRAM (RTX 4090 24GB)
+# Check GPU Utilization & VRAM (24 GiB RTX 4500 Ada)
 nvidia-smi
 nvtop
 ```
 
 ## Setup Steps
 
-### 1. Install Dependencies
+### 1. Configure the Dedicated Docker Storage
+
+The server has a 12.3 TiB RAID-backed `/home` filesystem. A separate 8 TiB filesystem or logical volume is strongly preferred. A separate filesystem prevents Docker images and persistent volumes from filling the host root and makes storage administration clearer.
+
+First inspect devices and existing mounts:
+
+```bash
+lsblk -o NAME,SIZE,FSTYPE,TYPE,MOUNTPOINTS
+sudo findmnt -T /home
+sudo df -hT /home
+sudo blkid
+```
+
+Do not format `md126p3` or any device already mounted at `/home` unless you intentionally intend to destroy its data.
+
+#### Option A — Separate 8 TiB filesystem (recommended)
+
+After identifying a verified, dedicated 8 TiB block device, replace `/dev/mapper/docker_8tb` below. Never run these commands on an existing or mounted filesystem:
+
+```bash
+sudo mkfs.xfs -f /dev/mapper/docker_8tb
+sudo mkdir -p /mnt/docker-8tb
+
+DEVICE_UUID=$(sudo blkid -s UUID -o value /dev/mapper/docker_8tb)
+echo "UUID=$DEVICE_UUID  /mnt/docker-8tb  xfs  defaults,noatime,nofail  0  2" | sudo tee -a /etc/fstab
+sudo mount -a
+sudo findmnt /mnt/docker-8tb
+sudo df -hT /mnt/docker-8tb
+```
+
+If the volume was formatted with ext4 instead of XFS, use `defaults,noatime,nofail 0 2` and the `ext4` filesystem type in `/etc/fstab`.
+
+Create Docker storage paths and configure the Docker data root:
+
+```bash
+sudo mkdir -p /mnt/docker-8tb/containers
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json >/dev/null <<'EOF'
+{
+  "data-root": "/mnt/docker-8tb/containers",
+  "storage-driver": "overlay2",
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m",
+    "max-file": "3"
+  }
+}
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+sudo docker info --format 'Docker data root: {{.DockerRootDir}}'
+```
+
+If Docker already has data, migrate it only after stopping Docker:
+
+```bash
+sudo systemctl stop docker
+sudo rsync -aHAX --numeric-ids /var/lib/docker/ /mnt/docker-8tb/containers/
+sudo systemctl start docker
+```
+
+Remove old Docker data from `/var/lib/docker` only after confirming that `docker ps -a`, `docker volume ls`, `docker system df`, and application data work correctly.
+
+#### Option B — Use `/home` on this server
+
+If no separate filesystem is available, use a dedicated directory on the existing RAID-backed `/home` filesystem. If Docker is already running, stop it before migrating data:
+
+```bash
+sudo systemctl stop docker
+sudo mkdir -p /home/docker-8tb
+sudo rsync -aHAX --numeric-ids /var/lib/docker/ /home/docker-8tb/
+```
+
+Configure the Docker data root:
+
+```bash
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json >/dev/null <<'EOF'
+{
+  "data-root": "/home/docker-8tb",
+  "storage-driver": "overlay2",
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m",
+    "max-file": "3"
+  }
+}
+EOF
+```
+
+Restart Docker, reload its configuration, and verify the effective data root:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+sudo systemctl is-active docker
+sudo docker info --format 'Docker data root: {{.DockerRootDir}}'
+sudo df -hT /home/docker-8tb
+```
+
+After Docker starts, allow the `systems` account to use Docker without `sudo`. A new login or shell is required for the new group membership:
+
+```bash
+sudo usermod -aG docker systems
+newgrp docker
+
+docker ps -a
+docker system df
+docker volume ls
+```
+
+This is storage isolation, not a hard 8 TiB quota. For a strict limit, configure filesystem quotas or create a separate 8 TiB logical volume. Monitor `/home` because Docker user volumes can consume most of the 12.3 TiB filesystem.
+
+Check storage regularly:
+
+```bash
+sudo df -hT
+sudo du -sh /mnt/docker-8tb 2>/dev/null || sudo du -sh /home/docker-8tb
+docker system df
+docker volume ls
+```
+
+### 2. Install Docker and NVIDIA Container Toolkit
+
+Enable the Docker CE repository and install Docker Engine plus Compose v2:
+
+```bash
+sudo dnf -y install dnf-plugins-core
+sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo dnf -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo systemctl enable --now docker
+```
+
+Use Docker's CentOS repository on RHEL/Rocky/Alma-compatible systems, or the Fedora repository for Fedora. For Fedora, replace the repository URL with `https://download.docker.com/linux/fedora/docker-ce.repo`.
+
+Install NVIDIA Container Toolkit from NVIDIA's RPM repository:
+
+```bash
+curl -s -L https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo | \
+  sudo tee /etc/yum.repos.d/nvidia-container-toolkit.repo >/dev/null
+sudo dnf makecache
+sudo dnf -y install nvidia-container-toolkit
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+```
+
+Install the NVIDIA host driver using the repository approved for the host distribution. For an NVIDIA CUDA repository on RHEL/Rocky/Alma, use:
+
+```bash
+sudo dnf -y install kernel-devel-$(uname -r) kernel-headers-$(uname -r) gcc make elfutils-libelf-devel
+# Install the NVIDIA driver package from your distribution or NVIDIA CUDA repository.
+# Example package names may vary: nvidia-driver, nvidia-open, or kmod-nvidia-open-dkms.
+```
+
+Do not remove or replace the existing working RAID, GPU, or kernel configuration to install a generic package. After rebooting, verify:
+
+```bash
+nvidia-smi
+sudo docker run --rm --gpus all nvidia/cuda:12.4.1-runtime-ubuntu22.04 nvidia-smi
+```
+
+Verify Docker:
+
+```bash
+docker --version
+docker compose version
+docker info --format 'Docker data root: {{.DockerRootDir}}'
+docker info | grep -A5 Runtimes
+```
+
+### 3. Install Dependencies
+
+Verify Node.js before installing dependencies. Node.js 20 or later is required:
+
+```bash
+node --version
+npm --version
+```
+
+If Node.js reports v16 or another unsupported version, remove or deactivate it and install Node.js 20+ using NVM for the `systems` user:
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+source ~/.bashrc
+nvm install 20
+nvm use 20
+nvm alias default 20
+node --version
+npm --version
+```
+
+NVM is preferable to mixing system Node.js packages with globally installed application dependencies.
+
 Navigate to the root directory of the project and install all required Node.js packages:
 ```bash
 npm install
 ```
 
-### 2. Configure Environment Variables
+### 4. Configure Environment Variables
 You need a `.env.local` file for the application to run.
 1. Ensure you have a `.env.local` file in the root directory (you can use or copy the existing one).
 2. Ensure the following variables are set appropriately (update `NEXTAUTH_SECRET` and MongoDB credentials for production):
@@ -49,8 +255,17 @@ You need a `.env.local` file for the application to run.
 NEXTAUTH_SECRET=a_very_secure_random_string
 NEXTAUTH_URL=http://localhost:3000
 
-# Database Connection String
-MONGODB_URI=mongodb://admin:AdminAccesspass@127.0.0.1:27017/nextauth_admin_db?authSource=admin
+# MongoDB credentials and Docker-network connection
+MONGO_INITDB_ROOT_USERNAME=admin
+MONGO_INITDB_ROOT_PASSWORD=replace_with_a_strong_database_password
+MONGO_ROOT_USER=admin
+MONGO_ROOT_PASSWORD=replace_with_a_strong_database_password
+
+# Host-side seed/tests (MongoDB is published at 127.0.0.1:27017)
+MONGODB_URI_HOST=mongodb://admin:replace_with_a_strong_database_password@127.0.0.1:27017/nextauth_admin_db?authSource=admin
+
+# Next.js inside the Docker network
+MONGODB_URI=mongodb://admin:replace_with_a_strong_database_password@mongodb:27017/nextauth_admin_db?authSource=admin
 
 # (Optional) For Google Authentication
 GOOGLE_CLIENT_ID=your_google_client_id_here
@@ -61,7 +276,22 @@ SSH_HOST=127.0.0.1
 ENABLE_GPU=true
 ```
 
-### 3. Run Setup Script (Build Image & Start Services)
+Allow only required network ports on the host firewall, and include SSH 2222–2300 for direct container access:
+
+```bash
+sudo dnf -y install firewalld
+sudo systemctl enable --now firewalld
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=https
+sudo firewall-cmd --permanent --add-service=ssh
+sudo firewall-cmd --permanent --add-port=2222-2300/tcp
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-all
+```
+
+If the server is behind a cloud or managed firewall, allow the same ports in its security group. Keep MongoDB port 27017 bound to localhost or the Docker network; do not expose it publicly.
+
+### 5. Run Setup Script (Build Image & Start Services)
 The supercomputer slot provisioning engine uses a GPU-accelerated Ubuntu base container with OpenSSH server, CUDA 12.4, and PyTorch (`access-ubuntu-ssh:latest`).
 
 Run the automated setup script which will build the Docker image and start all services (Next.js, MongoDB, Caddy) in the background:
@@ -78,20 +308,20 @@ chmod +x setup-development setup-development.sh setup-dev
 ./setup-development   # or ./setup-dev
 ```
 
-### 4. Seed the Admin User
+### 6. Seed the Admin User
 To create an initial admin user so you can log into the admin dashboard, run the interactive seeding script (MongoDB must be running from the previous step):
 ```bash
 node scripts/seed.js
 ```
 *(You will be prompted to enter a username and password)*
 
-### 5. Access the Application
+### 7. Access the Application
 The application should now be running.
 
 - **Production/Docker mode:** Access via [http://localhost](http://localhost) (proxied through Caddy).
 - **Development mode:** You can run `npm run dev` and access via [http://localhost:3000](http://localhost:3000).
 
-### 7. Running Validation & Checkpoint Tests
+### 8. Running Validation & Checkpoint Tests
 
 #### Checkpoint 1 — Slot Request APIs
 To run the automated verification script for the slot request data models, collision validation, and user/admin access boundaries:
@@ -420,8 +650,4 @@ Queries the live state of a container.
 
 #### 13. `findAvailablePort(minPort, maxPort)`
 Scans host TCP sockets and existing Docker container bindings in the specified port range (default: `2222-2300`) to find the next unused host port.
-
-## Common Issues
-- **Database Connection Error**: Ensure Docker is running and that the port `27017` is not blocked or in use by another local MongoDB instance.
-- **NextAuth Errors**: If you encounter errors signing in with Google, ensure your OAuth credentials are correct and you've added `http://localhost:3000` to your authorized origins/redirect URIs in the Google Cloud Console.
 

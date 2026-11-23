@@ -16,10 +16,11 @@ if (fs.existsSync(envPath)) {
   });
 }
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = (process.env.MONGODB_URI_HOST || process.env.MONGODB_URI || '')
+  .replace(/@mongodb(?::27017)?\//, '@127.0.0.1:27017/');
 
 if (!MONGODB_URI) {
-  console.error('Please define the MONGODB_URI environment variable inside .env.local');
+  console.error('Please define MONGODB_URI or MONGODB_URI_HOST inside .env.local');
   process.exit(1);
 }
 

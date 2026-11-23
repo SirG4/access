@@ -73,88 +73,93 @@ function RejectModal({ request, onConfirm, onClose, loading }) {
         .modal-overlay {
           position: fixed;
           inset: 0;
-          background: rgba(0,0,0,0.45);
-          backdrop-filter: blur(4px);
+          background: rgba(7, 23, 47, 0.65);
           display: flex;
           align-items: center;
           justify-content: center;
-          z-index: 1000;
-          padding: 1rem;
+          z-index: 400;
+          padding: 1.5rem;
           animation: fadeIn 0.15s ease;
         }
         @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
         .modal-box {
           background: #fff;
-          border-radius: 16px;
-          padding: 2rem;
-          max-width: 460px;
+          border: 1px solid #dde1e7;
+          border-radius: 8px;
+          padding: 1.5rem;
+          max-width: 480px;
           width: 100%;
-          box-shadow: 0 20px 60px rgba(0,0,0,0.18);
-          animation: slideUp 0.2s ease;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.16);
         }
-        @keyframes slideUp { from { transform: translateY(16px); opacity:0 } to { transform: translateY(0); opacity:1 } }
         .modal-title {
-          font-size: 1.1rem;
-          font-weight: 700;
-          color: #111;
-          margin-bottom: 0.4rem;
+          font-size: 1.125rem;
+          font-weight: 600;
+          color: #111827;
+          margin-bottom: 0.5rem;
         }
         .modal-meta {
           font-size: 0.8125rem;
-          color: #666;
+          color: #374151;
           margin-bottom: 1.25rem;
           line-height: 1.5;
+          padding: 0.6rem 0.75rem;
+          background: #f8f9fa;
+          border-radius: 6px;
+          border: 1px solid #dde1e7;
         }
         .modal-label {
           font-size: 0.8125rem;
-          font-weight: 600;
-          color: #444;
+          font-weight: 500;
+          color: #111827;
           margin-bottom: 0.35rem;
           display: block;
         }
         .modal-textarea {
+          box-sizing: border-box;
           width: 100%;
           min-height: 90px;
-          padding: 0.6rem 0.75rem;
-          border: 1px solid #ddd;
-          border-radius: 8px;
+          padding: 0.55rem 0.75rem;
+          border: 1px solid #dde1e7;
+          border-radius: 6px;
           font-size: 0.875rem;
           font-family: inherit;
           resize: vertical;
-          color: #111;
+          color: #111827;
           transition: border-color 0.15s;
           outline: none;
         }
         .modal-textarea:focus {
-          border-color: #111;
-          box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+          border-color: #1d4ed8;
+          box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.08);
         }
         .modal-actions {
           display: flex;
           gap: 0.75rem;
           margin-top: 1.25rem;
+          padding-top: 1rem;
+          border-top: 1px solid #dde1e7;
           justify-content: flex-end;
         }
         .modal-btn-cancel {
-          padding: 0.5rem 1.1rem;
-          border: 1px solid #ddd;
-          border-radius: 8px;
+          padding: 0.55rem 1.1rem;
+          border: 1px solid #dde1e7;
+          border-radius: 6px;
           background: #fff;
-          font-size: 0.875rem;
+          font-size: 0.8125rem;
           font-weight: 500;
           font-family: inherit;
           cursor: pointer;
-          color: #444;
+          color: #111827;
           transition: background 0.15s;
         }
-        .modal-btn-cancel:hover { background: #f5f5f5; }
+        .modal-btn-cancel:hover { background: #f8f9fa; }
         .modal-btn-reject {
-          padding: 0.5rem 1.25rem;
+          padding: 0.55rem 1.25rem;
           border: none;
-          border-radius: 8px;
+          border-radius: 6px;
           background: #dc2626;
           color: #fff;
-          font-size: 0.875rem;
+          font-size: 0.8125rem;
           font-weight: 600;
           font-family: inherit;
           cursor: pointer;
@@ -215,27 +220,27 @@ function TerminateModal({ request, onConfirm, onClose, loading }) {
         .modal-overlay {
           position: fixed;
           inset: 0;
-          background: rgba(0,0,0,0.5);
-          backdrop-filter: blur(4px);
+          background: rgba(7, 23, 47, 0.65);
           display: flex;
           align-items: center;
           justify-content: center;
-          z-index: 1000;
-          padding: 1rem;
+          z-index: 400;
+          padding: 1.5rem;
           animation: fadeIn 0.15s ease;
         }
         @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
         .modal-box {
           background: #fff;
-          border-radius: 16px;
-          padding: 2rem;
+          border: 1px solid #dde1e7;
+          border-radius: 8px;
+          padding: 1.5rem;
           max-width: 480px;
           width: 100%;
-          box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+          box-shadow: 0 10px 30px rgba(0,0,0,0.16);
         }
         .modal-title-danger {
-          font-size: 1.15rem;
-          font-weight: 700;
+          font-size: 1.125rem;
+          font-weight: 600;
           color: #b91c1c;
           margin-bottom: 0.4rem;
         }
@@ -670,24 +675,41 @@ export default function AdminRequestsPage() {
 
 /* ─── Styles ─────────────────────────────────────────────────────────────── */
 const pageStyles = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body { background: #fafafa; }
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --border: #dde1e7;
+    --text: #111827;
+    --text2: #374151;
+    --muted: #6b7280;
+    --accent: #1d4ed8;
+    --font: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+  }
 
   .dash-layout {
     display: flex;
     min-height: 100vh;
-    background-color: #fafafa;
-    font-family: 'Inter', system-ui, sans-serif;
+    background-color: var(--bg);
+    font-family: var(--font);
   }
 
   .main-content {
     flex: 1;
     padding: 2rem;
     overflow-y: auto;
-    background-color: #fafafa;
+    background-color: var(--bg);
   }
 
   .content-header {
@@ -703,12 +725,12 @@ const pageStyles = `
     font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: -0.02em;
-    color: #111111;
+    color: var(--text);
   }
 
   .header-subtitle {
     font-size: 0.875rem;
-    color: #555555;
+    color: var(--text2);
     margin-top: 0.25rem;
   }
 
@@ -722,8 +744,9 @@ const pageStyles = `
     padding: 0.55rem 0.9rem;
     border-radius: 6px;
     background: #ffffff;
-    border: 1px solid #e5e5e5;
-    color: #111111;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font);
     font-weight: 500;
     font-size: 0.8125rem;
     cursor: pointer;
@@ -731,7 +754,7 @@ const pageStyles = `
   }
 
   .btn-refresh:hover {
-    background: #f5f5f5;
+    background: #f8f9fa;
   }
 
   /* ── error banner ───── */
@@ -825,14 +848,14 @@ const pageStyles = `
   /* ── request card ───── */
   .req-card {
     background: #fff;
-    border: 1px solid #e8e8e8;
-    border-radius: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
     padding: 1.25rem 1.35rem;
-    transition: box-shadow 0.15s;
+    transition: border-color 0.15s;
   }
 
   .req-card:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    border-color: #cbd5e1;
   }
 
   .req-header {
@@ -850,12 +873,12 @@ const pageStyles = `
   .req-title {
     font-size: 0.9375rem;
     font-weight: 600;
-    color: #111;
+    color: var(--text);
   }
 
   .req-purpose {
     font-size: 0.8125rem;
-    color: #666;
+    color: var(--text2);
     line-height: 1.4;
   }
 
@@ -877,12 +900,12 @@ const pageStyles = `
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #aaa;
+    color: var(--muted);
   }
 
   .req-meta-val {
     font-size: 0.8125rem;
-    color: #333;
+    color: var(--text);
     font-weight: 500;
   }
 
@@ -891,17 +914,17 @@ const pageStyles = `
     color: #991b1b;
     background: #fef2f2;
     border: 1px solid #fecaca;
-    border-radius: 8px;
+    border-radius: 6px;
     padding: 0.5rem 0.75rem;
     margin-bottom: 0.875rem;
   }
 
   .req-admin-note {
     font-size: 0.8125rem;
-    color: #444;
-    background: #f8f8f8;
-    border: 1px solid #eee;
-    border-radius: 8px;
+    color: var(--text2);
+    background: #f8f9fa;
+    border: 1px solid var(--border);
+    border-radius: 6px;
     padding: 0.5rem 0.75rem;
     margin-bottom: 0.875rem;
   }
@@ -911,34 +934,33 @@ const pageStyles = `
     gap: 0.625rem;
     margin-top: 0.75rem;
     padding-top: 0.875rem;
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid var(--border);
   }
 
   .btn-approve {
     padding: 0.45rem 1.1rem;
     border: none;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    border-radius: 6px;
+    background: #1d4ed8;
     color: #fff;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
     transition: background 0.15s;
     letter-spacing: -0.01em;
-    box-shadow: 0 2px 8px rgba(29, 78, 216, 0.25);
   }
 
-  .btn-approve:hover:not(:disabled) { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); box-shadow: 0 4px 12px rgba(29, 78, 216, 0.35); }
+  .btn-approve:hover:not(:disabled) { background: #1e40af; }
   .btn-approve:disabled { opacity: 0.4; cursor: not-allowed; }
 
   .btn-reject {
     padding: 0.45rem 1.1rem;
     border: 1px solid #fecaca;
-    border-radius: 8px;
+    border-radius: 6px;
     background: #fff;
     color: #dc2626;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
@@ -953,8 +975,8 @@ const pageStyles = `
     text-align: center;
     padding: 3.5rem 1.5rem;
     background: #fff;
-    border: 1px solid #e8e8e8;
-    border-radius: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
   }
 
   .empty-icon {

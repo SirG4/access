@@ -121,15 +121,15 @@ export default function AdminUsersPage() {
     return (
       <>
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
           *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
           .page {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #fafafa;
-            font-family: 'Inter', system-ui, sans-serif;
+            background: #f4f5f7;
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
           }
           .card {
             width: 100%;
@@ -140,13 +140,13 @@ export default function AdminUsersPage() {
           .wordmark {
             font-size: 0.9375rem;
             font-weight: 600;
-            color: #111;
+            color: #111827;
             letter-spacing: -0.01em;
             margin-bottom: 2.5rem;
           }
           .sub {
             font-size: 0.875rem;
-            color: #888;
+            color: #6b7280;
           }
         `}</style>
         <div className="page">
@@ -162,22 +162,39 @@ export default function AdminUsersPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
-        body { background: #fafafa; }
+        :root {
+          --bg: #f4f5f7;
+          --surface: #ffffff;
+          --border: #dde1e7;
+          --text: #111827;
+          --text2: #374151;
+          --muted: #6b7280;
+          --accent: #1d4ed8;
+          --font: 'IBM Plex Sans', system-ui, sans-serif;
+          --font-mono: 'IBM Plex Mono', monospace;
+        }
+
+        body {
+          background: var(--bg);
+          color: var(--text);
+          font-family: var(--font);
+          -webkit-font-smoothing: antialiased;
+        }
 
         .dash-layout {
           display: flex;
           min-height: 100vh;
-          background-color: #fafafa;
-          font-family: 'Inter', system-ui, sans-serif;
+          background-color: var(--bg);
+          font-family: var(--font);
         }
 
         .main-content {
           flex: 1;
           padding: 2rem;
           overflow-y: auto;
-          background-color: #fafafa;
+          background-color: var(--bg);
         }
 
         .content-header {
@@ -193,35 +210,34 @@ export default function AdminUsersPage() {
           font-size: 1.5rem;
           font-weight: 700;
           letter-spacing: -0.02em;
-          color: #111111;
+          color: var(--text);
         }
 
         .header-subtitle {
           font-size: 0.875rem;
-          color: #555555;
+          color: var(--text2);
           margin-top: 0.25rem;
         }
 
         .surface-card {
           width: 100%;
-          padding: 2rem;
+          padding: 1.5rem;
           background: #ffffff;
-          border: 1px solid #e5e5e5;
-          border-radius: 12px;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+          border: 1px solid var(--border);
+          border-radius: 8px;
         }
 
         h1 {
-          font-size: 1.375rem;
+          font-size: 1.25rem;
           font-weight: 600;
-          color: #111;
+          color: var(--text);
           letter-spacing: -0.02em;
           margin-bottom: 0.375rem;
         }
 
         .sub {
           font-size: 0.875rem;
-          color: #888;
+          color: var(--muted);
           margin-bottom: 1.5rem;
         }
 
@@ -237,10 +253,10 @@ export default function AdminUsersPage() {
 
         .success-msg {
           font-size: 0.8125rem;
-          color: #27ae60;
+          color: #166534;
           padding: 0.5rem 0.625rem;
-          background: #f2fbf5;
-          border: 1px solid #c2ebd0;
+          background: #f0fdf4;
+          border: 1px solid #bbf7d0;
           border-radius: 6px;
           margin-bottom: 1.25rem;
         }
@@ -257,20 +273,21 @@ export default function AdminUsersPage() {
         }
 
         th {
-          font-size: 0.75rem;
+          font-size: 0.72rem;
           font-weight: 600;
-          color: #888;
+          color: var(--muted);
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          padding: 0.75rem 0.5rem;
-          border-bottom: 1px solid #e5e5e5;
+          padding: 0.75rem 0.75rem;
+          border-bottom: 1px solid var(--border);
+          background: #f8f9fa;
         }
 
         td {
-          padding: 0.875rem 0.5rem;
-          border-bottom: 1px solid #f0f0f0;
+          padding: 0.875rem 0.75rem;
+          border-bottom: 1px solid var(--border);
           font-size: 0.875rem;
-          color: #111;
+          color: var(--text);
           vertical-align: middle;
         }
 
@@ -287,8 +304,8 @@ export default function AdminUsersPage() {
         .badge-self {
           font-size: 0.6875rem;
           font-weight: 500;
-          background: #f0f0f0;
-          color: #666;
+          background: #f1f5f9;
+          color: var(--text2);
           padding: 0.125rem 0.375rem;
           border-radius: 4px;
         }
@@ -299,23 +316,25 @@ export default function AdminUsersPage() {
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.03em;
-          padding: 0.175rem 0.45rem;
+          padding: 0.2rem 0.5rem;
           border-radius: 4px;
         }
 
         .badge-admin {
-          background: #111;
-          color: #fff;
+          background: #eff6ff;
+          color: #1e40af;
+          border: 1px solid #bfdbfe;
         }
 
         .badge-user {
-          background: #eee;
-          color: #555;
+          background: #f3f4f6;
+          color: #4b5563;
+          border: 1px solid #e5e7eb;
         }
 
         .provider-text {
           font-size: 0.8125rem;
-          color: #777;
+          color: var(--muted);
           text-transform: capitalize;
         }
 
@@ -328,7 +347,7 @@ export default function AdminUsersPage() {
 
         .btn-action {
           height: 2rem;
-          padding: 0 0.65rem;
+          padding: 0 0.75rem;
           border-radius: 6px;
           font-size: 0.8125rem;
           font-weight: 500;
@@ -339,53 +358,52 @@ export default function AdminUsersPage() {
         }
 
         .btn-make-admin {
-          background: #111;
+          background: #1d4ed8;
           color: #fff;
           border: none;
         }
 
         .btn-make-admin:hover:not(:disabled) {
-          background: #333;
+          background: #1e40af;
         }
 
         .btn-demote {
           background: #fff;
-          color: #444;
-          border: 1px solid #ddd;
+          color: var(--text);
+          border: 1px solid var(--border);
         }
 
         .btn-demote:hover:not(:disabled) {
-          background: #f5f5f5;
-          border-color: #ccc;
-          color: #111;
+          background: #f8f9fa;
+          color: var(--text);
         }
 
         .btn-delete {
           background: #fff;
-          color: #c0392b;
-          border: 1px solid #f5c6c2;
+          color: #dc2626;
+          border: 1px solid #fecaca;
         }
 
         .btn-delete:hover:not(:disabled) {
-          background: #fdf3f2;
-          border-color: #e59993;
+          background: #fef2f2;
+          border-color: #fca5a5;
         }
 
         .btn-action:disabled {
-          opacity: 0.35;
+          opacity: 0.4;
           cursor: not-allowed;
         }
 
         .empty-row {
           text-align: center;
-          color: #888;
+          color: var(--muted);
           padding: 2rem 0;
           font-size: 0.875rem;
         }
 
         .divider {
           height: 1px;
-          background: #e5e5e5;
+          background: var(--border);
           margin-top: 1.5rem;
           margin-bottom: 1.5rem;
         }
@@ -398,76 +416,79 @@ export default function AdminUsersPage() {
 
         .user-count {
           font-size: 0.8125rem;
-          color: #888;
+          color: var(--muted);
         }
 
         .modal-overlay {
           position: fixed;
           inset: 0;
-          background: rgba(0, 0, 0, 0.4);
-          backdrop-filter: blur(4px);
+          background: rgba(7, 23, 47, 0.65);
           display: flex;
           align-items: center;
           justify-content: center;
-          z-index: 1000;
-          padding: 1rem;
+          z-index: 400;
+          padding: 1.5rem;
         }
 
         .modal-box {
           background: #ffffff;
-          border: 1px solid #e5e5e5;
-          border-radius: 12px;
-          padding: 2rem;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          padding: 1.5rem;
           max-width: 460px;
           width: 100%;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
         }
 
         .modal-title {
-          font-size: 1.15rem;
-          font-weight: 700;
-          color: #111;
+          font-size: 1.125rem;
+          font-weight: 600;
+          color: var(--text);
           margin-bottom: 0.5rem;
         }
 
         .modal-sub {
           font-size: 0.875rem;
-          color: #666;
+          color: var(--text2);
           line-height: 1.5;
-          margin-bottom: 1.5rem;
+          margin-bottom: 1.25rem;
         }
 
         .modal-actions {
           display: flex;
           justify-content: flex-end;
           gap: 0.75rem;
+          padding-top: 1rem;
+          border-top: 1px solid var(--border);
         }
 
         .btn-modal-back {
-          padding: 0.5rem 1rem;
-          border: 1px solid #e5e5e5;
+          padding: 0.55rem 1.1rem;
+          border: 1px solid var(--border);
           border-radius: 6px;
           background: #ffffff;
-          color: #111;
+          color: var(--text);
           font-size: 0.8125rem;
           font-weight: 500;
           cursor: pointer;
+          font-family: inherit;
           transition: all 0.15s;
         }
-        .btn-modal-back:hover { background: #f5f5f5; }
+        .btn-modal-back:hover { background: #f8f9fa; }
 
         .btn-modal-delete-confirm {
-          padding: 0.5rem 1.1rem;
+          padding: 0.55rem 1.1rem;
           border: none;
           border-radius: 6px;
-          background: #c0392b;
+          background: #dc2626;
           color: #ffffff;
           font-size: 0.8125rem;
           font-weight: 600;
           cursor: pointer;
+          font-family: inherit;
           transition: background 0.15s;
         }
-        .btn-modal-delete-confirm:hover:not(:disabled) { background: #a93226; }
+        .btn-modal-delete-confirm:hover:not(:disabled) { background: #b91c1c; }
         .btn-modal-delete-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
       `}</style>
 

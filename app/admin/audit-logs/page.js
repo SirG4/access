@@ -247,22 +247,40 @@ export default function AdminAuditLogsPage() {
 }
 
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #fafafa; }
+
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --border: #dde1e7;
+    --text: #111827;
+    --text2: #374151;
+    --muted: #6b7280;
+    --accent: #1d4ed8;
+    --font: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+  }
 
   .dash-layout {
     display: flex;
     min-height: 100vh;
-    background-color: #fafafa;
-    font-family: 'Inter', system-ui, sans-serif;
+    background-color: var(--bg);
+    font-family: var(--font);
   }
 
   .main-content {
     flex: 1;
     padding: 2rem;
     overflow-y: auto;
-    background-color: #fafafa;
+    background-color: var(--bg);
   }
 
   .content-header {
@@ -278,12 +296,12 @@ const styles = `
     font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: -0.02em;
-    color: #111111;
+    color: var(--text);
   }
 
   .header-subtitle {
     font-size: 0.875rem;
-    color: #555555;
+    color: var(--text2);
     margin-top: 0.25rem;
   }
 
@@ -305,35 +323,35 @@ const styles = `
     align-items: center;
     gap: 0.5rem;
     font-size: 0.875rem;
-    color: #444;
+    color: var(--text2);
   }
   .select-input {
-    padding: 0.4rem 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
     background: #fff;
     font-family: inherit;
     font-size: 0.8125rem;
-    color: #111;
+    color: var(--text);
     outline: none;
   }
   .btn-refresh {
-    padding: 0.4rem 0.875rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    padding: 0.45rem 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
     background: #fff;
     font-size: 0.8125rem;
     font-weight: 500;
     font-family: inherit;
     cursor: pointer;
-    color: #444;
+    color: var(--text);
     transition: all 0.15s;
   }
-  .btn-refresh:hover { background: #f0f0f0; color: #111; }
+  .btn-refresh:hover { background: #f8f9fa; }
   .error-banner {
     background: #fef2f2;
     border: 1px solid #fecaca;
-    border-radius: 10px;
+    border-radius: 6px;
     padding: 0.75rem 1rem;
     margin-bottom: 1.25rem;
     font-size: 0.875rem;
@@ -341,10 +359,9 @@ const styles = `
   }
   .table-card {
     background: #fff;
-    border: 1px solid #e8e8e8;
-    border-radius: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
   }
   .table-responsive {
     overflow-x: auto;
@@ -356,26 +373,26 @@ const styles = `
     font-size: 0.8125rem;
   }
   .audit-table th {
-    background: #fafafa;
+    background: #f8f9fa;
     padding: 0.75rem 1rem;
     font-weight: 600;
-    color: #666;
-    border-bottom: 1px solid #eee;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
     text-transform: uppercase;
     font-size: 0.7rem;
     letter-spacing: 0.05em;
   }
   .audit-table td {
     padding: 0.75rem 1rem;
-    border-bottom: 1px solid #f0f0f0;
-    color: #333;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
     vertical-align: top;
   }
   .audit-table tr:last-child td {
     border-bottom: none;
   }
   .audit-table tr:hover td {
-    background: #fafafa;
+    background: #f8f9fa;
   }
   .time-cell {
     white-space: nowrap;

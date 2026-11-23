@@ -346,20 +346,26 @@ export default function CalendarPage() {
             </div>
 
             <form onSubmit={submitBooking} className="modal-form">
-              <label className="field-label">
-                Title
+              <div className="form-group">
+                <label className="field-label" htmlFor="slot-title">
+                  <span>Title</span>
+                </label>
                 <input
+                  id="slot-title"
                   className="field-input"
                   type="text"
                   placeholder="e.g. Deep Learning Training"
                   value={form.title}
                   onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                 />
-              </label>
+              </div>
 
-              <label className="field-label">
-                Purpose <span className="required">*</span>
+              <div className="form-group">
+                <label className="field-label" htmlFor="slot-purpose">
+                  <span>Purpose</span> <span className="required">*</span>
+                </label>
                 <textarea
+                  id="slot-purpose"
                   className="field-textarea"
                   rows={3}
                   placeholder="Describe your use case…"
@@ -367,34 +373,40 @@ export default function CalendarPage() {
                   onChange={(e) => setForm((f) => ({ ...f, purpose: e.target.value }))}
                   required
                 />
-              </label>
+              </div>
 
               <div className="field-row">
-                <label className="field-label" style={{ flex: 1 }}>
-                  Start Time <span className="required">*</span>
+                <div className="form-group" style={{ flex: 1, minWidth: 0 }}>
+                  <label className="field-label" htmlFor="slot-start-time">
+                    <span>Start Time</span> <span className="required">*</span>
+                  </label>
                   <input
+                    id="slot-start-time"
                     className="field-input"
                     type="datetime-local"
                     value={form.startTime}
                     onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
                     required
                   />
-                </label>
-                <label className="field-label" style={{ flex: 1 }}>
-                  End Time <span className="required">*</span>
+                </div>
+                <div className="form-group" style={{ flex: 1, minWidth: 0 }}>
+                  <label className="field-label" htmlFor="slot-end-time">
+                    <span>End Time</span> <span className="required">*</span>
+                  </label>
                   <input
+                    id="slot-end-time"
                     className="field-input"
                     type="datetime-local"
                     value={form.endTime}
                     onChange={(e) => setForm((f) => ({ ...f, endTime: e.target.value }))}
                     required
                   />
-                </label>
+                </div>
               </div>
 
               {form.startTime && form.endTime && new Date(form.startTime) < new Date(form.endTime) && (
                 <div className="duration-hint">
-                  Duration: {fmtDuration(new Date(form.startTime), new Date(form.endTime))}
+                  <span>Duration: <strong>{fmtDuration(new Date(form.startTime), new Date(form.endTime))}</strong></span>
                   {hasCollision(slots, new Date(form.startTime), new Date(form.endTime)) && (
                     <span className="collision-pill"> ⚠ Conflict detected</span>
                   )}
@@ -459,9 +471,6 @@ export default function CalendarPage() {
                   </button>
                 ))}
               </div>
-              <button className="btn-book" onClick={openModalEmpty}>
-                + Book Slot
-              </button>
             </div>
           </div>
 
@@ -1111,9 +1120,10 @@ const css = `
   /* ── Modal ── */
   .modal-overlay {
     position: fixed; inset: 0;
-    background: rgba(7, 23, 47, 0.6);
+    background: rgba(7, 23, 47, 0.65);
     display: flex; align-items: center; justify-content: center;
     z-index: 400;
+    padding: 1.5rem;
     animation: fadeIn 0.15s ease;
   }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -1122,49 +1132,70 @@ const css = `
     border: 1px solid var(--border);
     border-radius: 8px;
     width: 100%;
-    max-width: 480px;
-    margin: 1rem;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    max-width: 520px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.16);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   .modal-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 1.125rem 1.25rem;
+    padding: 1.25rem 1.5rem;
     border-bottom: 1px solid var(--border);
+    background: #ffffff;
   }
-  .modal-title { font-size: 1rem; font-weight: 600; color: var(--text); }
+  .modal-title { font-size: 1.125rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
   .modal-close {
     background: none; border: none; color: var(--text2); cursor: pointer;
-    font-size: 1.125rem; line-height: 1; padding: 0.25rem;
-    transition: color 0.1s;
+    font-size: 1.25rem; line-height: 1; padding: 0.25rem;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px;
+    transition: color 0.1s, background 0.1s;
   }
-  .modal-close:hover { color: var(--text); }
-  .modal-form { display: flex; flex-direction: column; gap: 1rem; padding: 1.25rem; }
-  .field-label { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.8125rem; font-weight: 500; color: var(--text2); }
-  .required { color: #c0392b; }
+  .modal-close:hover { color: var(--text); background: var(--surface2); }
+  .modal-form { display: flex; flex-direction: column; gap: 1.15rem; padding: 1.5rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; }
+  .field-label { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.8125rem; font-weight: 500; color: var(--text); }
+  .required { color: #dc2626; font-weight: 700; margin-left: 0.15rem; }
   .field-input, .field-textarea {
+    box-sizing: border-box;
     background: #ffffff;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--text);
     font-family: var(--font);
     font-size: 0.875rem;
-    padding: 0.5rem 0.75rem;
+    padding: 0.55rem 0.75rem;
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s;
     width: 100%;
+    max-width: 100%;
   }
-  .field-input:focus, .field-textarea:focus { border-color: #111111; }
-  .field-textarea { resize: vertical; min-height: 72px; }
-  .field-row { display: flex; gap: 0.75rem; }
-  .duration-hint { font-size: 0.78rem; color: var(--text2); }
+  .field-input:focus, .field-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .field-textarea { resize: vertical; min-height: 80px; line-height: 1.4; }
+  .field-row { display: flex; gap: 1rem; align-items: flex-start; }
+  .duration-hint {
+    font-size: 0.8125rem;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.65rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .duration-hint strong { color: var(--text); }
   .collision-pill {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     background: #fef3c7;
     color: #92400e;
     font-size: 0.72rem;
+    font-weight: 600;
     padding: 2px 6px;
     border-radius: 4px;
-    margin-left: 0.5rem;
+    border: 1px solid #fde68a;
   }
   .form-error {
     background: #fdf3f2;
@@ -1173,34 +1204,44 @@ const css = `
     color: #c0392b;
     font-size: 0.8125rem;
     padding: 0.6rem 0.75rem;
+    line-height: 1.4;
   }
-  .modal-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
+  .modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    align-items: center;
+    padding-top: 1rem;
+    margin-top: 0.25rem;
+    border-top: 1px solid var(--border);
+  }
   .btn-ghost {
     background: #ffffff;
     border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--text);
     font-family: var(--font);
-    font-size: 0.875rem;
-    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    padding: 0.55rem 1.1rem;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
   }
-  .btn-ghost:hover { background: #f5f5f5; }
+  .btn-ghost:hover { background: var(--surface2); border-color: #cbd5e1; }
   .btn-primary {
     background: #1d4ed8;
-    border: none;
+    border: 1px solid transparent;
     border-radius: 6px;
     color: #ffffff;
     font-family: var(--font);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 600;
-    padding: 0.5rem 1.25rem;
+    padding: 0.55rem 1.25rem;
     cursor: pointer;
     transition: background 0.15s;
   }
   .btn-primary:hover:not(:disabled) { background: #1e40af; }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
   /* ── Toast ── */
   .toast {

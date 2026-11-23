@@ -736,22 +736,23 @@ function MonthGrid({ currentDate, slots, openModal, STATUS_COLORS, fmtTime, setC
 
 /* ─── CSS ─────────────────────────────────────────────────── */
 const css = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #fafafa;
+    --bg: #f4f5f7;
     --surface: #ffffff;
-    --surface2: #f8f8fa;
-    --surface3: #f5f5f5;
-    --border: #e5e5e5;
-    --text: #111111;
-    --text2: #666666;
-    --accent: #111111;
-    --accent-glow: rgba(0,0,0,0.06);
-    --radius: 8px;
-    --font: 'Inter', system-ui, sans-serif;
+    --surface2: #f8f9fa;
+    --surface3: #f4f5f7;
+    --border: #dde1e7;
+    --text: #111827;
+    --text2: #374151;
+    --accent: #1d4ed8;
+    --accent-glow: rgba(29, 78, 216, 0.08);
+    --radius: 6px;
+    --font: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
   }
 
   /* ── Layout ── */
@@ -761,6 +762,7 @@ const css = `
     background: var(--bg);
     font-family: var(--font);
     color: var(--text);
+    -webkit-font-smoothing: antialiased;
   }
 
   .main-content {
@@ -850,9 +852,9 @@ const css = `
     transition: background 0.15s, color 0.15s;
   }
   .vt-btn:hover { background: #f5f5f5; color: var(--text); }
-  .vt-active { background: #111111 !important; color: #ffffff !important; font-weight: 500; }
+  .vt-active { background: #1d4ed8 !important; color: #ffffff !important; font-weight: 500; }
   .btn-book {
-    background: #111111;
+    background: #1d4ed8;
     border: none;
     color: #ffffff;
     font-family: var(--font);
@@ -864,7 +866,7 @@ const css = `
     transition: background 0.15s;
     letter-spacing: -0.01em;
   }
-  .btn-book:hover { background: #333333; }
+  .btn-book:hover { background: #1e40af; }
 
   /* ── Calendar container ── */
   .cal-container {
@@ -906,7 +908,7 @@ const css = `
   .wg-date-num { font-size: 1.125rem; font-weight: 600; color: var(--text); line-height: 1.3; }
   .wg-today-num {
     width: 2rem; height: 2rem;
-    background: #111111;
+    background: #1d4ed8;
     color: #ffffff;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -950,7 +952,7 @@ const css = `
     position: absolute;
     left: 0; right: 0;
     height: 2px;
-    background: #111111;
+    background: #1d4ed8;
     z-index: 5;
     pointer-events: none;
   }
@@ -959,7 +961,7 @@ const css = `
     left: -4px;
     top: -4px;
     width: 10px; height: 10px;
-    background: #111111;
+    background: #1d4ed8;
     border-radius: 50%;
   }
 
@@ -1029,7 +1031,7 @@ const css = `
   .month-num { font-size: 0.8125rem; font-weight: 500; color: var(--text); }
   .month-num-today {
     width: 1.5rem; height: 1.5rem;
-    background: #111111;
+    background: #1d4ed8;
     color: #ffffff;
     border-radius: 50%;
     display: inline-flex; align-items: center; justify-content: center;
@@ -1109,24 +1111,21 @@ const css = `
   /* ── Modal ── */
   .modal-overlay {
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.4);
+    background: rgba(7, 23, 47, 0.6);
     display: flex; align-items: center; justify-content: center;
-    z-index: 100;
-    backdrop-filter: blur(4px);
+    z-index: 400;
     animation: fadeIn 0.15s ease;
   }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   .modal-box {
     background: #ffffff;
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 8px;
     width: 100%;
     max-width: 480px;
     margin: 1rem;
-    animation: slideUp 0.2s ease;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
   }
-  @keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   .modal-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 1.125rem 1.25rem;
@@ -1189,7 +1188,7 @@ const css = `
   }
   .btn-ghost:hover { background: #f5f5f5; }
   .btn-primary {
-    background: #111111;
+    background: #1d4ed8;
     border: none;
     border-radius: 6px;
     color: #ffffff;
@@ -1200,7 +1199,7 @@ const css = `
     cursor: pointer;
     transition: background 0.15s;
   }
-  .btn-primary:hover:not(:disabled) { background: #333333; }
+  .btn-primary:hover:not(:disabled) { background: #1e40af; }
   .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
   /* ── Toast ── */
@@ -1214,9 +1213,10 @@ const css = `
     font-family: var(--font);
     font-size: 0.875rem;
     font-weight: 500;
-    animation: slideUp 0.2s ease;
+    animation: toastIn 0.2s ease;
     box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   .toast-success { background: #27ae60; color: #ffffff; }
   .toast-error { background: #c0392b; color: #ffffff; }
 

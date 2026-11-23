@@ -451,4 +451,61 @@ const styles = `
   }
   .btn-page:disabled { opacity: 0.4; cursor: not-allowed; }
   .page-indicator { font-weight: 500; color: #333; }
+
+  /* ── Mobile Phone Responsiveness ── */
+  @media (max-width: 768px) {
+    .dash-layout {
+      flex-direction: column !important;
+      width: 100% !important;
+    }
+    .main-content {
+      padding: 1.25rem 1rem !important;
+      width: 100% !important;
+    }
+    .content-header {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 0.75rem !important;
+      margin-bottom: 1.25rem !important;
+    }
+    .header-actions {
+      width: 100% !important;
+    }
+    .btn-refresh {
+      width: 100% !important;
+      text-align: center !important;
+      justify-content: center !important;
+    }
+    .filter-bar {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 0.75rem !important;
+    }
+    .filter-group {
+      width: 100% !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 0.35rem !important;
+    }
+    .select-input {
+      width: 100% !important;
+    }
+    .table-responsive {
+      width: 100% !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+    .audit-table {
+      white-space: nowrap !important;
+    }
+    .pagination-bar {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 0.75rem !important;
+      text-align: center !important;
+    }
+    .page-btns {
+      justify-content: center !important;
+    }
+  }
 `;

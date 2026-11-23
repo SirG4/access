@@ -426,14 +426,59 @@ export default function SignInPage() {
         @media (max-width: 900px) {
           .auth-page {
             flex-direction: column;
+            min-height: 100vh;
+            width: 100%;
           }
           .hero-section {
             padding: 2.5rem 1.5rem;
             flex: none;
+            width: 100%;
           }
           .form-section {
             padding: 2.5rem 1.5rem;
             min-width: unset;
+            width: 100%;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .hero-section {
+            padding: 1.75rem 1rem;
+          }
+          .service-subtitle {
+            font-size: 0.75rem;
+            margin-bottom: 1.25rem;
+          }
+          .feature-cards {
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+          }
+          .feature-card {
+            padding: 0.6rem 0.75rem;
+            font-size: 0.78rem;
+          }
+          .tag-pills {
+            flex-wrap: wrap;
+            gap: 0.4rem;
+          }
+          .form-section {
+            padding: 1.75rem 1.15rem;
+            min-width: unset;
+          }
+          .form-header h1 {
+            font-size: 1.5rem;
+          }
+          .form-header p {
+            font-size: 0.8125rem;
+            margin-bottom: 1.5rem;
+          }
+          .input-field {
+            font-size: 1rem;
+            padding: 0.65rem 0.75rem 0.65rem 2.5rem;
+          }
+          .submit-btn {
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
           }
         }
       `}</style>

@@ -1486,4 +1486,82 @@ const pageStyles = `
   }
   .toast-success { background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); color: #fff; }
   .toast-error { background: #dc2626; color: #fff; }
+
+  /* ── Mobile Phone Responsiveness ── */
+  @media (max-width: 768px) {
+    .dash-layout {
+      flex-direction: column !important;
+      width: 100% !important;
+    }
+    .main-content {
+      padding: 1.25rem 1rem !important;
+      width: 100% !important;
+    }
+    .content-header {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 0.75rem !important;
+      margin-bottom: 1.25rem !important;
+    }
+    .header-actions {
+      width: 100% !important;
+    }
+    .btn-refresh {
+      width: 100% !important;
+      text-align: center !important;
+      justify-content: center !important;
+    }
+    .stats-grid {
+      grid-template-columns: 1fr 1fr !important;
+      gap: 0.75rem !important;
+    }
+    .toolbar {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 0.75rem !important;
+    }
+    .tabs {
+      width: 100% !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      padding: 0.3rem !important;
+    }
+    .tab-btn {
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+    }
+    .toolbar-right {
+      width: 100% !important;
+      flex-direction: column !important;
+      gap: 0.5rem !important;
+    }
+    .search-input {
+      min-width: 0 !important;
+      width: 100% !important;
+    }
+    .container-card {
+      padding: 1rem 0.875rem !important;
+    }
+    .card-top {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 0.5rem !important;
+    }
+    .graphs-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .card-actions {
+      flex-direction: column !important;
+      gap: 0.5rem !important;
+    }
+    .card-actions button, .btn-action {
+      width: 100% !important;
+      text-align: center !important;
+    }
+    .modal-box {
+      max-width: 100% !important;
+      width: 100% !important;
+      max-height: calc(100vh - 2rem) !important;
+    }
+  }
 `;

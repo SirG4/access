@@ -383,12 +383,9 @@ export default function UserDashboardClient({ session }) {
                       <span className="banner-badge-completed">SESSION CONCLUDED</span>
                       <h3 className="banner-title">Your latest session has ended</h3>
                       <p className="banner-desc">
-                        Your container state and <code>/workspace</code> directory have been securely saved. Book a new time slot to resume work.
+                        Your container state and <code>/workspace</code> directory have been securely saved. Use <strong>+ Book New Slot</strong> above to schedule your next reservation.
                       </p>
                     </div>
-                    <Link href="/dashboard/calendar" className="btn-book">
-                      + Book Next Session
-                    </Link>
                   </section>
                 );
               }
@@ -399,10 +396,7 @@ export default function UserDashboardClient({ session }) {
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                   </div>
                   <h2>No Active Container Session</h2>
-                  <p>You currently do not have an active or scheduled supercomputer access slot. Book a time slot on the interactive calendar to get instant container access.</p>
-                  <Link href="/dashboard/calendar" className="btn-book-large" id="hero-book-btn">
-                    + Schedule Supercomputer Slot
-                  </Link>
+                  <p>You currently do not have an active or scheduled supercomputer access slot. Use <strong>+ Book New Slot</strong> in the header above to schedule container access.</p>
                 </section>
               );
             })()
@@ -419,10 +413,7 @@ export default function UserDashboardClient({ session }) {
               <div className="loading-state">Loading your reservations...</div>
             ) : requests.length === 0 ? (
               <div className="empty-state">
-                <p>No access requests found.</p>
-                <Link href="/dashboard/calendar" className="btn-book" style={{ marginTop: "1rem" }}>
-                  Book Your First Slot
-                </Link>
+                <p>No access requests found. Click <strong>+ Book New Slot</strong> above to get started.</p>
               </div>
             ) : (
               <div className="table-wrapper">
@@ -568,151 +559,6 @@ const css = `
     display: flex;
     min-height: 100vh;
     background-color: var(--bg);
-  }
-
-  /* ── Sidebar ── */
-  .sidebar {
-    width: 260px;
-    background: #07172f;
-    border-right: 1px solid rgba(255,255,255,0.06);
-    display: flex;
-    flex-direction: column;
-    padding: 1.5rem 1rem;
-    flex-shrink: 0;
-  }
-
-  .brand-header {
-    display: flex;
-    flex-direction: column;
-    padding: 0 0.5rem 1.25rem;
-    border-bottom: 1px solid var(--surface-border);
-    margin-bottom: 1.25rem;
-  }
-
-  .brand-logo {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: -0.02em;
-  }
-
-  .brand-sub {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    margin-top: 0.2rem;
-  }
-
-  .nav-menu {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    flex: 1;
-  }
-
-  .nav-group-title {
-    font-size: 0.6875rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    margin: 1.25rem 0.5rem 0.5rem;
-  }
-
-  .nav-link {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.65rem 0.85rem;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    text-decoration: none;
-    transition: all 0.15s ease;
-  }
-
-  .nav-link:hover {
-    background: rgba(255,255,255,0.07);
-    color: #e2e8f0;
-  }
-
-  .nav-link.active {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    font-weight: 600;
-    border-left: 2px solid #60a5fa;
-    padding-left: calc(0.85rem - 2px);
-  }
-
-  .nav-icon {
-    font-size: 1rem;
-  }
-
-  .sidebar-footer {
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--surface-border);
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .user-profile {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .user-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #1d4ed8;
-    color: #ffffff;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.875rem;
-    flex-shrink: 0;
-  }
-
-  .user-info {
-    overflow: hidden;
-  }
-
-  .user-email {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: #e2e8f0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .user-role-badge {
-    font-size: 0.6875rem;
-    color: var(--text-muted);
-    text-transform: capitalize;
-    font-weight: 500;
-  }
-
-  .btn-signout {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid var(--surface-border);
-    border-radius: 6px;
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 0.8125rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .btn-signout:hover {
-    background: #fdf3f2;
-    color: #c0392b;
-    border-color: #f5c6cb;
   }
 
   /* ── Main Content Area ── */
@@ -1505,4 +1351,125 @@ const css = `
   }
   .btn-modal-cancel-confirm:hover:not(:disabled) { background: #b91c1c; }
   .btn-modal-cancel-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── Mobile Phone Responsiveness ── */
+  @media (max-width: 768px) {
+    .dash-layout {
+      flex-direction: column !important;
+      width: 100% !important;
+    }
+
+    .main-content {
+      padding: 1.25rem 1rem !important;
+      width: 100% !important;
+    }
+
+    .content-header {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 1rem !important;
+      margin-bottom: 1.25rem !important;
+    }
+
+    .header-actions {
+      width: 100% !important;
+      display: flex !important;
+      gap: 0.5rem !important;
+    }
+
+    .btn-refresh, .btn-book {
+      flex: 1 !important;
+      justify-content: center !important;
+      text-align: center !important;
+    }
+
+    .active-card-hero {
+      padding: 1.25rem 1rem !important;
+    }
+
+    .hero-badge-row {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 0.5rem !important;
+    }
+
+    .hero-title-row {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 1rem !important;
+    }
+
+    .timer-box {
+      width: 100% !important;
+      box-sizing: border-box !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      text-align: left !important;
+      padding: 0.65rem 1rem !important;
+    }
+
+    .timer-label {
+      margin-bottom: 0 !important;
+    }
+
+    .credentials-panel {
+      padding: 1rem 0.875rem !important;
+    }
+
+    .ip-hero-row {
+      flex-direction: column !important;
+    }
+
+    .ip-hero-divider {
+      width: 100% !important;
+      height: 1px !important;
+    }
+
+    .ip-hero-item {
+      padding: 0.75rem !important;
+    }
+
+    .ssh-input-row {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 0.75rem !important;
+    }
+
+    .btn-copy {
+      align-self: flex-start !important;
+    }
+
+    .cred-grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    .cred-item-wide {
+      grid-column: span 1 !important;
+    }
+
+    .upcoming-banner,
+    .concluded-banner {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 1rem !important;
+      padding: 1.25rem 1rem !important;
+    }
+
+    .history-section {
+      padding: 1.25rem 1rem !important;
+    }
+
+    .table-wrapper {
+      width: 100% !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+
+    .req-table th,
+    .req-table td {
+      padding: 0.75rem 0.6rem !important;
+      white-space: nowrap !important;
+    }
+  }
 `;

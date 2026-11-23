@@ -1268,4 +1268,109 @@ const css = `
 
   /* Colorscheme inputs */
   input[type="datetime-local"] { color-scheme: light; }
+
+  /* ── Mobile Phone Responsiveness ── */
+  @media (max-width: 768px) {
+    .dash-layout {
+      flex-direction: column !important;
+      width: 100% !important;
+    }
+
+    .main-content {
+      padding: 1.25rem 0.875rem !important;
+      gap: 1rem !important;
+      width: 100% !important;
+    }
+
+    .content-header {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 0.875rem !important;
+      margin-bottom: 0.5rem !important;
+    }
+
+    .header-actions {
+      width: 100% !important;
+    }
+
+    .btn-book {
+      width: 100% !important;
+      text-align: center !important;
+      justify-content: center !important;
+      padding: 0.65rem 1rem !important;
+    }
+
+    .toolbar {
+      padding: 0.75rem !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 0.75rem !important;
+    }
+
+    .toolbar-left {
+      width: 100% !important;
+      justify-content: space-between !important;
+    }
+
+    .toolbar-right {
+      width: 100% !important;
+    }
+
+    .view-toggle {
+      width: 100% !important;
+      display: flex !important;
+    }
+
+    .vt-btn {
+      flex: 1 !important;
+      text-align: center !important;
+      padding: 0.5rem 0.25rem !important;
+    }
+
+    .cal-container {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      width: 100% !important;
+    }
+
+    .week-grid {
+      min-width: 620px !important;
+    }
+
+    .month-grid {
+      min-width: 540px !important;
+    }
+
+    .legend {
+      padding: 0.6rem 0.85rem !important;
+      gap: 0.6rem 0.85rem !important;
+    }
+
+    .my-requests {
+      padding: 0.85rem 0.75rem !important;
+      max-height: 45vh !important;
+    }
+
+    .modal-box {
+      max-width: 100% !important;
+      width: 100% !important;
+      max-height: calc(100vh - 2rem) !important;
+    }
+
+    .field-row {
+      flex-direction: column !important;
+      gap: 0.75rem !important;
+    }
+
+    .modal-actions {
+      flex-direction: column-reverse !important;
+      gap: 0.5rem !important;
+    }
+
+    .btn-ghost, .btn-primary {
+      width: 100% !important;
+      text-align: center !important;
+      padding: 0.65rem !important;
+    }
+  }
 `;

@@ -1048,4 +1048,70 @@ const pageStyles = `
   .toast-success { background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); color: #fff; }
   .toast-info { background: #1e40af; color: #fff; }
   .toast-error { background: #dc2626; color: #fff; }
+
+  /* ── Mobile Phone Responsiveness ── */
+  @media (max-width: 768px) {
+    .dash-layout {
+      flex-direction: column !important;
+      width: 100% !important;
+    }
+    .main-content {
+      padding: 1.25rem 1rem !important;
+      width: 100% !important;
+    }
+    .content-header {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 0.75rem !important;
+      margin-bottom: 1.25rem !important;
+    }
+    .header-actions {
+      width: 100% !important;
+    }
+    .btn-refresh {
+      width: 100% !important;
+      text-align: center !important;
+      justify-content: center !important;
+    }
+    .tabs {
+      width: 100% !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      padding: 0.3rem !important;
+      max-width: 100% !important;
+    }
+    .tab-btn {
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+      padding: 0.35rem 0.65rem !important;
+    }
+    .req-card {
+      padding: 1rem !important;
+    }
+    .req-meta-grid {
+      grid-template-columns: 1fr 1fr !important;
+      gap: 0.65rem !important;
+    }
+    .req-actions {
+      flex-direction: column !important;
+      gap: 0.5rem !important;
+    }
+    .btn-approve, .btn-reject, .btn-terminate {
+      width: 100% !important;
+      text-align: center !important;
+      padding: 0.6rem !important;
+    }
+    .modal-box {
+      max-width: 100% !important;
+      width: 100% !important;
+      max-height: calc(100vh - 2rem) !important;
+    }
+    .modal-actions {
+      flex-direction: column-reverse !important;
+      gap: 0.5rem !important;
+    }
+    .modal-actions button {
+      width: 100% !important;
+    }
+  }
 `;

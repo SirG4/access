@@ -490,6 +490,51 @@ export default function AdminUsersPage() {
         }
         .btn-modal-delete-confirm:hover:not(:disabled) { background: #b91c1c; }
         .btn-modal-delete-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ── Mobile Phone Responsiveness ── */
+        @media (max-width: 768px) {
+          .dash-layout {
+            flex-direction: column !important;
+            width: 100% !important;
+          }
+          .main-content {
+            padding: 1.25rem 1rem !important;
+            width: 100% !important;
+          }
+          .content-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 0.75rem !important;
+            margin-bottom: 1.25rem !important;
+          }
+          .surface-card {
+            padding: 1.25rem 1rem !important;
+          }
+          .table-container {
+            width: 100% !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+          }
+          table {
+            white-space: nowrap !important;
+          }
+          .actions {
+            flex-wrap: wrap !important;
+            justify-content: flex-start !important;
+          }
+          .modal-box {
+            max-width: 100% !important;
+            width: 100% !important;
+            max-height: calc(100vh - 2rem) !important;
+          }
+          .modal-actions {
+            flex-direction: column-reverse !important;
+            gap: 0.5rem !important;
+          }
+          .modal-actions button {
+            width: 100% !important;
+          }
+        }
       `}</style>
 
       <div className="dash-layout">

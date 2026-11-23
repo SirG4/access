@@ -14,19 +14,23 @@ export default function Sidebar({ session }) {
   return (
     <>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
         :root {
-          --bg: #f8fafc;
+          --bg: #f4f5f7;
           --surface: #ffffff;
-          --surface-border: #e2e8f0;
-          --text-primary: #0f172a;
-          --text-secondary: #475569;
-          --text-muted: #94a3b8;
+          --surface-border: #dde1e7;
+          --text-primary: #111827;
+          --text-secondary: #374151;
+          --text-muted: #6b7280;
           --accent: #1d4ed8;
-          --accent-hover: #2563eb;
+          --accent-hover: #1e40af;
           --accent-light: rgba(29, 78, 216, 0.08);
           --navy: #07172f;
+          --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
         }
 
+        body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
         .dash-layout {
           display: flex;
           min-height: 100vh;
@@ -102,10 +106,11 @@ export default function Sidebar({ session }) {
         }
 
         .nav-link.active {
-          background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+          background: rgba(255, 255, 255, 0.1);
           color: #ffffff;
           font-weight: 600;
-          box-shadow: 0 2px 8px rgba(29, 78, 216, 0.35);
+          border-left: 2px solid #60a5fa;
+          padding-left: calc(0.85rem - 2px);
         }
 
         .nav-icon {
@@ -137,7 +142,7 @@ export default function Sidebar({ session }) {
           width: 36px;
           height: 36px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+          background: #1d4ed8;
           color: #ffffff;
           font-weight: 700;
           display: flex;
@@ -145,7 +150,6 @@ export default function Sidebar({ session }) {
           justify-content: center;
           font-size: 0.875rem;
           flex-shrink: 0;
-          border: 1px solid rgba(59,130,246,0.4);
         }
 
         .user-info {

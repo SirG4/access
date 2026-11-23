@@ -326,7 +326,14 @@ The application should now be running.
 #### Checkpoint 1 — Slot Request APIs
 To run the automated verification script for the slot request data models, collision validation, and user/admin access boundaries:
 ```bash
-node scripts/test-checkpoint-1.js
+sudo curl -fsSL \
+  https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo \
+  -o /etc/yum.repos.d/nvidia-container-toolkit.repo
+
+sudo dnf clean metadata
+sudo dnf makecache --refresh
+sudo dnf repolist | grep -i nvidia
+sudo dnf install -y nvidia-container-toolkit
 ```
 
 #### Checkpoint 2 — Calendar UI & Slot Booking
